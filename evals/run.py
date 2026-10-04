@@ -49,14 +49,14 @@ def norm(text):
 
 
 def load_case(name):
-    case = json.loads((CASES / name / "case.json").read_text())
+    case = json.loads((CASES / name / "case.json").read_text(encoding="utf-8"))
     case["name"] = name
     return case
 
 
 def score(case, out_path, in_path=None):
     in_path = in_path or CASES / case["name"] / "input" / case["file"]
-    src = pathlib.Path(out_path).read_text()
+    src = pathlib.Path(out_path).read_text(encoding="utf-8")
     comments = []
     for ln, text in comment_guard.split(str(out_path), src)[1]:
         # Consecutive line comments read as one comment.
