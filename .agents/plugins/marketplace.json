@@ -1,0 +1,21 @@
+{
+  "name": "comment-tune",
+  "interface": {
+    "displayName": "comment-tune"
+  },
+  "plugins": [
+    {
+      "name": "comment-tune",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/myoungji-kim/comment-tune.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

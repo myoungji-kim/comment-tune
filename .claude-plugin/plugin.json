@@ -1,0 +1,14 @@
+{
+  "name": "comment-tune",
+  "version": "0.1.0",
+  "description": "Tunes code comments: trim the noise, fill in missing context, fix stale ones.",
+  "author": {
+    "name": "myoungji-kim",
+    "url": "https://github.com/myoungji-kim"
+  },
+  "homepage": "https://github.com/myoungji-kim/comment-tune",
+  "repository": "https://github.com/myoungji-kim/comment-tune",
+  "license": "MIT",
+  "keywords": ["comments", "code-review", "documentation", "cleanup"],
+  "hooks": "./hooks/session-hooks.json"
+}

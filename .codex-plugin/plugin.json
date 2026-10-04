@@ -1,0 +1,28 @@
+{
+  "name": "comment-tune",
+  "version": "0.1.0",
+  "description": "Tunes code comments: trim the noise, fill in missing context, fix stale ones.",
+  "author": {
+    "name": "myoungji-kim",
+    "url": "https://github.com/myoungji-kim"
+  },
+  "homepage": "https://github.com/myoungji-kim/comment-tune",
+  "repository": "https://github.com/myoungji-kim/comment-tune",
+  "license": "MIT",
+  "keywords": ["comments", "code-review", "documentation", "cleanup"],
+  "skills": "./codex/skills/",
+  "hooks": "./hooks/session-hooks.json",
+  "interface": {
+    "displayName": "comment-tune",
+    "shortDescription": "Cut the noise. Keep the context.",
+    "longDescription": "Keeps code comments to what the code can't say: trims noise, fills in missing context, fixes stale comments. Never changes code.",
+    "developerName": "myoungji-kim",
+    "category": "Productivity",
+    "capabilities": ["Instructions", "Lifecycle hooks"],
+    "websiteURL": "https://github.com/myoungji-kim/comment-tune",
+    "defaultPrompt": [
+      "Tune the comments in my current diff.",
+      "Audit the comments in this repository."
+    ]
+  }
+}

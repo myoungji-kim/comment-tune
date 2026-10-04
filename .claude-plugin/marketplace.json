@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "comment-tune",
+  "description": "Cut the noise. Keep the context.",
+  "owner": {
+    "name": "myoungji-kim",
+    "url": "https://github.com/myoungji-kim"
+  },
+  "plugins": [
+    {
+      "name": "comment-tune",
+      "description": "Tunes code comments: trim the noise, fill in missing context, fix stale ones.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

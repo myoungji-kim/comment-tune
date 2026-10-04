@@ -1,0 +1,36 @@
+{
+  "file": "sync_repository.dart",
+  "commit_message": "Add SyncRepository\n\nWrites are spaced 800 ms apart: the sync API answers 429 Too Many\nRequests to writes from the same device less than 800 ms apart.",
+  "noise": [
+    "Constructor for SyncRepository.",
+    "Previously this used package:http directly",
+    "Added caching as requested",
+    "Fetch the items from the API",
+    "print('fetched",
+    "---------------- Private helpers",
+    {
+      "exact": "// FIXME"
+    }
+  ],
+  "context": [
+    "ignore_for_file: prefer_const_constructors",
+    "Hive boxes must not be opened twice; keep this lazy and shared.",
+    "The API sends updatedAt in seconds, not milliseconds."
+  ],
+  "stale": [
+    "Cache expires after 10 minutes",
+    "Returns an empty list when the device is offline."
+  ],
+  "expect_comment": [
+    {
+      "kind": "fill",
+      "anchor": "await Future.delayed(const Duration(milliseconds: 800));",
+      "any": [
+        "429",
+        "reject",
+        "too many",
+        "rate"
+      ]
+    }
+  ]
+}

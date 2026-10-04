@@ -1,0 +1,36 @@
+{
+  "file": "githubClient.ts",
+  "commit_message": "Add GitHubClient\n\nStop at 50 remaining requests: the webhook handler shares this token\nand needs that reserve to acknowledge deliveries.",
+  "noise": [
+    "==================== Types",
+    "The base URL.",
+    "Sends a GET request.",
+    "Now uses fetch instead of axios",
+    "console.log(res.status);",
+    "increment the counter",
+    "I changed this to throw instead of sleeping",
+    {
+      "exact": "// TODO"
+    }
+  ],
+  "context": [
+    "eslint-disable-next-line @typescript-eslint/no-explicit-any",
+    "Don't retry POSTs: they aren't idempotent and the server may have applied them.",
+    "GitHub sends the reset time in epoch seconds."
+  ],
+  "stale": [
+    "Default timeout: 30s",
+    "or undefined on 404"
+  ],
+  "expect_comment": [
+    {
+      "kind": "fill",
+      "anchor": "if (remaining < 50) {",
+      "any": [
+        "webhook",
+        "reserve",
+        "share"
+      ]
+    }
+  ]
+}
