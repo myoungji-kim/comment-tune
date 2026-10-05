@@ -87,6 +87,8 @@ Never remove or rewrite:
 - Doc comments on public API, which IDEs and doc tools show to callers, even
   when they only restate the name; fix them if stale, never remove them. On
   non-public code a doc comment that only restates the name is `restates`.
+  Non-public means `private`/`internal` members, lowercase (unexported) Go
+  names, and Dart or Python names that start with `_`.
 - Comments the user explicitly asked for.
 
 ## Rewrites
