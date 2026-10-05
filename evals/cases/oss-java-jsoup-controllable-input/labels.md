@@ -5,7 +5,7 @@ Lines refer to input/ControllableInputStream.java. Consecutive line comments are
 | line | verdict | tag | comment | why |
 |---|---|---|---|---|
 | 16 | keep | api-contract | A jsoup internal class (so don't use it as there is no contra | class doc, internal-use warning |
-| 20 | keep | constraint | reimplemented from ConstrainableInputStream for JDK21 - exten | BufferedInputStream pins virtual threads |
+| 20 | rewrite | history | reimplemented from ConstrainableInputStream for JDK21 - exten | drop 'reimplemented from…', keep the thread-pinning warning |
 | 22-31 | keep | rationale | super.in, but typed as SimpleBufferedInput / logical cap ... | field units, sentinels, latch, allowClose reason |
 | 33 | ambiguous | - | if we are tracking progress, will have the expected content l | mostly restates the field |
 | 35-36 | keep | magic-number | expected content length for progress; -1 == unknown / amount | -1 sentinel |
@@ -24,7 +24,7 @@ Lines refer to input/ControllableInputStream.java. Consecutive line comments are
 | 152 | keep | api-contract | Reads this inputstream to a ByteBuffer. The supplied max may b | public static method doc |
 | 160 | ambiguous | - | Share the same byte[] pool as SBI | restates call, or rationale |
 | 168 | ambiguous | - | needs to grow | restates the condition, small aid |
-| 181 | remove | restates | Prepare the buffer for reading | restates flip() |
+| 181 | keep | clarification | Prepare the buffer for reading | explains an unclear library call (flip) |
 | 188, 205 | keep | rationale | not synchronized in later JDKs | reason for the suppression |
 | 201 | ambiguous | - | readPos is used for progress emits | mild rationale |
 | 211 | keep | api-contract | Check if the underlying InputStream has been read fully. Ther | public method doc |

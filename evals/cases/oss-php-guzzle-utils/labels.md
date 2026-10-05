@@ -15,7 +15,7 @@
 | 193 | keep | untouchable | @return array<string, mixed> | type info |
 | 207 | keep | untouchable | @param array{...} / @return array{max_host_connections?:... | type info |
 | 231 | keep | untouchable | @param (callable(RequestInterface, ... $handler | type info |
-| 246 | ambiguous | - | Get the default User-Agent string to use with Guzzle. | see below |
+| 246 | keep | api-contract | Get the default User-Agent string to use with Guzzle. | public doc, kept even when it restates the name |
 | 254 | keep | api-contract | Creates an associative array of lowercase header names t... | public doc, key/value direction |
 | 268 | keep | untouchable | @param mixed $protocols / @return string[] / @throws Inv... | type info |
 
@@ -24,8 +24,5 @@ contract, or a reason the code cannot show.
 
 ## Ambiguous, not scored
 
-- 246 `Get the default User-Agent string to use with Guzzle.`: restates the
-  method name (criteria `restates` example), yet it is public PHPDoc that API
-  docs render.
 - 130: untouchable type info, but its whole text also appears inside the 207
   doc, so no substring names it uniquely; left out of case.json.

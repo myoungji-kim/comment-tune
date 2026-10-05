@@ -13,7 +13,7 @@
 | 131 | remove | restates | More data was requested so read from the remote stream | the `if ($remaining)` says it |
 | 133 | keep | rationale | If data was written to the buffer in a position that wou... | why bytes are skipped |
 | 151 | keep | rationale | A short cache write would silently corrupt later replays... | why the check throws |
-| 162 | keep | rationale | When appending to the end of the currently read stream,... | why overflow is tracked |
+| 162 | rewrite | verbose | When appending to the end of the currently read stream,... | last sentence repeats the first; keep the rest |
 | 196 | keep | api-contract | Close the remote stream and any attached cache stream. | public doc, cache closed only if attached |
 
 Lines 78-80, 101-102, 133-136 and 162-165 are consecutive line comments, so

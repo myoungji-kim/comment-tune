@@ -18,7 +18,7 @@
 | 103 | keep | magic-number | The stream id this window handler is for (is `0` for conn... | where stream id 0 comes from |
 | 115 | keep | api-contract | The current size for the incoming data window. | public getter, never-negative invariant |
 | 121 | keep | api-contract | Signals that we received [numberOfBytes] from the remote ... | public method doc |
-| 125 | ambiguous | - | If this turns negative, it means the remote end send us m... | 22-line trap explanation |
+| 125 | keep | trap | If this turns negative, it means the remote end send us m... | checked: changeSettings runs only at setup, so case c holds |
 | 154 | keep | todo-with-reason | Tell the peer we received [numberOfBytes] bytes. ... TODO... | public doc merged with TODO that names the pause case |
 | 163 | keep | todo-with-reason | TODO: This can be optimized by delaying the window update... | TODO says what and why |
 
@@ -29,4 +29,3 @@ Reference fixes: line 12 becomes "The peer's flow control window (connection or 
 - 41: mostly restates the `if`, but names the event being fired; could go either way.
 - 94: private field doc that mostly restates the type.
 - 97: private field, but the "negative means the peer overran us" note is useful; no tag fits a private field cleanly.
-- 125: true trap explanation (why case c can't happen), but 22 lines long; `verbose` rewrite or keep-as-is are both defensible, and the claim about initial settings can't be verified in this file.
