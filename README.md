@@ -68,7 +68,6 @@ real open-source files, 3 runs each:
 | noise comments removed | 61/78 (78%) | 44/78 (56%) |
 | comments worth keeping deleted | 2/450 | 0/450 |
 | stale comments fixed | 24/27 | 26/27 |
-| tokens per run | ~204k | ~172k |
 
 The plain prompt deletes nothing worth keeping, but it rewrites and adds six
 times as many comments, and some of those rewrites turn a true comment into a
@@ -85,6 +84,16 @@ wrong one. comment-tune changes far less and makes nothing up.
 | expected context comments added | | 42/42 |
 | comment added where none belongs | | 0/21 |
 | runs that changed code | 0 | 0 |
+
+### Cost
+
+- **Always on:** the core rules add about 460 tokens to each session.
+- **Per run, it depends on the edits, not the file size.** With Claude Code's
+  default model, one `/comment-tune --apply` on a real file cost $0.17–0.18
+  when nothing needed changing (4 turns) and about $0.36 when many comments
+  did (16–19 turns). The plain prompt cost $0.19–0.37 on the same four files;
+  the averages were $0.27 for both. About 85% of the tokens are cache reads,
+  billed at a tenth of fresh input, so raw token counts overstate the cost.
 
 Read these with their limits. The labels were drafted with Claude against the
 criteria, and the blind judge is also Claude, so both share the model's habits.

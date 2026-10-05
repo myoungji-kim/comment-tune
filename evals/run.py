@@ -209,6 +209,8 @@ def fmt(s):
     cols.append("code CHANGED" if s["code_changed"] else "code unchanged")
     if s.get("tokens") is not None:
         cols.append(f"tokens {s['tokens']:,}")
+    if s.get("cost_usd") is not None:
+        cols.append(f"${s['cost_usd']:.3f}, {s.get('turns')} turns")
     return " | ".join(cols)
 
 
@@ -288,11 +290,13 @@ def run_claude(ws, case, arm, model):
         result = json.loads(proc.stdout)
     except json.JSONDecodeError:
         print(proc.stdout[-2000:], proc.stderr[-2000:], file=sys.stderr)
-        return None, None
+        return None, None, {}
     usage = result.get("usage", {})
-    tokens = sum(usage.get(k, 0) for k in ("input_tokens", "cache_creation_input_tokens",
-                                           "cache_read_input_tokens", "output_tokens"))
-    return tokens, result.get("result")
+    parts = {k: usage.get(k, 0) for k in ("input_tokens", "cache_creation_input_tokens",
+                                          "cache_read_input_tokens", "output_tokens")}
+    # Cache reads dominate the token total but cost a fraction of fresh input; keep the split.
+    meta = {"cost_usd": result.get("total_cost_usd"), "turns": result.get("num_turns"), "usage": parts}
+    return sum(parts.values()), result.get("result"), meta
 
 
 def summarize(rows):
@@ -302,6 +306,9 @@ def summarize(rows):
     summary["runs_with_code_changes"] = sum(r["code_changed"] for r in rows)
     counted = [r["tokens"] for r in rows if r["tokens"]]
     summary["avg_tokens"] = round(sum(counted) / len(counted)) if counted else None
+    costs = [r["cost_usd"] for r in rows if r.get("cost_usd") is not None]
+    if costs:
+        summary["avg_cost_usd"] = round(sum(costs) / len(costs), 4)
     return summary
 
 
@@ -313,13 +320,13 @@ def run_agent(args, names):
         case = load_case(name)
         for i in range(args.runs):
             ws = workspace(case)
-            tokens, report = run_claude(ws, case, args.arm, args.model)
+            tokens, report, meta = run_claude(ws, case, args.arm, args.model)
             # Keep the output so a later scorer can rescore it without another agent run.
             saved = run_dir / f"{name}-{i + 1}" / case["file"]
             saved.parent.mkdir(parents=True)
             shutil.copy(ws / case["file"], saved)
             s = score(case, saved)
-            s.update(case=name, run=i + 1, tokens=tokens, report=report,
+            s.update(case=name, run=i + 1, tokens=tokens, report=report, **meta,
                      output=saved.relative_to(ROOT).as_posix())
             rows.append(s)
             print(f"{name} #{i + 1}: {fmt(s)}", flush=True)
@@ -345,8 +352,8 @@ def rescore(path):
         if "output" not in old:
             sys.exit(f"{path} predates saved outputs; rerun the agent")
         s = score(load_case(old["case"]), ROOT / old["output"])
-        s.update(case=old["case"], run=old["run"], tokens=old["tokens"], report=old["report"],
-                 output=old["output"])
+        s.update({k: old[k] for k in ("case", "run", "tokens", "report", "output", "cost_usd", "turns", "usage")
+                  if k in old})
         rows.append(s)
         print(f"{old['case']} #{old['run']}: {fmt(s)}")
     data.update(summary=summarize(rows), runs=rows)
