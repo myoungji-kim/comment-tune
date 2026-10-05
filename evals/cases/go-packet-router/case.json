@@ -14,7 +14,7 @@
   "expect_comment": [
     {
       "kind": "fill",
-      "anchor": "routes []route",
+      "anchor": ["routes []route", "for _, rt := range r.routes {"],
       "any": ["linear", "map", "eight", "benchmark"],
       "tag": "rationale"
     },

@@ -1,6 +1,6 @@
 {
   "file": "OrderService.java",
-  "commit_message": "Add OrderService\n\nRefunds pause 250 ms between orders because Stripe allows at most\n4 refund requests per second per account.",
+  "commit_message": "Add OrderService\n\nRefunds pause 250 ms between orders because Stripe allows at most\n4 refund requests per second per account.\n\nEach refund is tried up to five times (MAX_ATTEMPTS); support asked for\nfive after three left too many orders stuck on transient gateway errors.",
   "noise": [
     {
       "text": "======================= Dependencies",
