@@ -136,17 +136,23 @@ def score(case, out_path, in_path=None):
         ok = lines_ok(item)
         return bool(ok) and not any(end in ok for _, end, _ in added)
 
-    return {
-        "noise_removed": [sum(not present(n) for n in case["noise"]), len(case["noise"])],
-        "context_kept": [sum(present(c) for c in case["context"]), len(case["context"])],
-        "stale_fixed": [sum(not present(s) for s in case["stale"]), len(case["stale"])],
-        "expected_comments": [sum(has_comment(e) for e in case["expect_comment"]),
-                              len(case["expect_comment"])],
-        "forbid_respected": [sum(left_alone(f) for f in case["forbid_comment"]),
-                             len(case["forbid_comment"])],
-        "code_changed": comment_guard.fingerprint(str(in_path))
-        != comment_guard.fingerprint(str(out_path), src),
+    checks = {
+        "noise_removed": ("noise", lambda n: not present(n)),
+        "context_kept": ("context", present),
+        "stale_fixed": ("stale", lambda s: not present(s)),
+        "expected_comments": ("expect_comment", has_comment),
+        "forbid_respected": ("forbid_comment", left_alone),
     }
+    result, missed = {}, {}
+    for metric, (group, passes) in checks.items():
+        failed = [i for i in case[group] if not passes(i)]
+        result[metric] = [len(case[group]) - len(failed), len(case[group])]
+        if failed:
+            missed[metric] = [i.get("exact") or i.get("text") or i["anchor"] for i in failed]
+    result["code_changed"] = (comment_guard.fingerprint(str(in_path))
+                              != comment_guard.fingerprint(str(out_path), src))
+    result["missed"] = missed
+    return result
 
 
 def fmt(s):
