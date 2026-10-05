@@ -1,0 +1,104 @@
+{
+  "file": "retry.go",
+  "commit_message": "Import retry.go",
+  "source": {
+    "repo": "https://github.com/cenkalti/backoff",
+    "commit": "b1a30d947ca896d37518610255281904b439c619",
+    "path": "retry.go",
+    "license": "MIT"
+  },
+  "noise": [
+    {
+      "text": "Initialize default retry options.",
+      "tag": "restates"
+    },
+    {
+      "text": "Apply user-provided options to the default settings.",
+      "tag": "restates"
+    },
+    {
+      "text": "Execute the operation.",
+      "tag": "restates"
+    },
+    {
+      "text": "Stop immediately on a permanent error; surface it as a RetryError.",
+      "tag": "restates"
+    },
+    {
+      "text": "Stop retrying if maximum tries exceeded.",
+      "tag": "restates"
+    },
+    {
+      "text": "Stop retrying if context is cancelled.",
+      "tag": "restates"
+    },
+    {
+      "text": "Calculate next backoff duration.",
+      "tag": "restates"
+    },
+    {
+      "text": "Reset backoff if a RetryAfterError requested a specific delay.",
+      "tag": "restates"
+    },
+    {
+      "text": "Notify on error if a notifier function is provided.",
+      "tag": "restates"
+    },
+    {
+      "text": "Wait for the next backoff period or context cancellation.",
+      "tag": "restates"
+    }
+  ],
+  "context": [
+    {
+      "text": "DefaultMaxElapsedTime sets a default limit for the total retry duration",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Return a Permanent error to stop retrying immediately",
+      "tag": "api-contract"
+    },
+    {
+      "text": "not for the final error that stops Retry",
+      "tag": "api-contract"
+    },
+    {
+      "text": "RetryOption configures the behavior of Retry.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "A BackOff is stateful and not safe for concurrent",
+      "tag": "api-contract"
+    },
+    {
+      "text": "WithNotify sets a function called after each failed attempt",
+      "tag": "api-contract"
+    },
+    {
+      "text": "limits the total number of attempts, not retries",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The limit is checked only between attempts",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The operation receives no",
+      "tag": "api-contract"
+    },
+    {
+      "text": "A typed-nil *RetryAfterError also matches; treat it as a plain error.",
+      "tag": "trap"
+    },
+    {
+      "text": "Clamp it so it cannot stretch the elapsed-time budget.",
+      "tag": "rationale"
+    }
+  ],
+  "stale": [
+    {
+      "text": "Maximum number of retry attempts.",
+      "tag": "stale"
+    }
+  ]
+}

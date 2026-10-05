@@ -1,0 +1,38 @@
+{
+  "file": "retry.dart",
+  "commit_message": "Import retry.dart",
+  "source": {
+    "repo": "https://github.com/dart-lang/http",
+    "commit": "47c57df399bf38927d2c9f047a1a5e3c049c0271",
+    "path": "pkgs/http/lib/retry.dart",
+    "license": "BSD-3-Clause"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "Copyright (c) 2017, the Dart project authors",
+      "tag": "untouchable"
+    },
+    {
+      "text": "makes a copy of the request data in order to support",
+      "tag": "api-contract"
+    },
+    {
+      "text": "`n` retries means that the request will be sent at most `n + 1` times",
+      "tag": "api-contract"
+    },
+    {
+      "text": "This will retry a request at most `delays.length` times",
+      "tag": "api-contract"
+    },
+    {
+      "text": "If the inner client doesn't support abortable, we still try to avoid",
+      "tag": "rationale"
+    },
+    {
+      "text": "Make sure the response stream is listened to so that we don't leave",
+      "tag": "workaround"
+    }
+  ],
+  "stale": []
+}

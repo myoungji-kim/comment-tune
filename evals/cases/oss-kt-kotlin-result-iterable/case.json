@@ -1,0 +1,106 @@
+{
+  "file": "Iterable.kt",
+  "commit_message": "Import Iterable.kt",
+  "source": {
+    "repo": "https://github.com/michaelbull/kotlin-result",
+    "commit": "aed7438b2bd92adc704b5022e64cddf263e38800",
+    "path": "kotlin-result/src/commonMain/kotlin/com/github/michaelbull/result/Iterable.kt",
+    "license": "ISC"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "`true` if each element [is ok][Result.isOk]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "`true` if each element [is an error]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "`true` if at least one element [is ok]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "`true` if at least one element [is an error]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Returns the number of elements that [are ok]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Returns the number of elements that [are an error]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "list containing only elements that [are ok]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "list containing only elements that [are an error]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Appends the [values][Result.value] of each element",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Appends the [errors][Result.error] of each element",
+      "tag": "api-contract"
+    },
+    {
+      "text": "on each [ok][Result.isOk] value and returns the collection",
+      "tag": "api-contract"
+    },
+    {
+      "text": "on each [error][Result.isErr] value and returns the collection",
+      "tag": "api-contract"
+    },
+    {
+      "text": "on each [ok][Result.isOk] value and its index",
+      "tag": "api-contract"
+    },
+    {
+      "text": "on each [error][Result.isErr] value and its index",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Partitions the specified [results] into a [Pair]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Partitions [this] iterable into a [Pair] of [Lists][List]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Partitions [this] iterable into a [Pair] of collections",
+      "tag": "api-contract"
+    },
+    {
+      "text": "the specified [results] into a single [Result] (holding a [List]).",
+      "tag": "api-contract"
+    },
+    {
+      "text": "[this] iterable into a single [Result] (holding a [List]).",
+      "tag": "api-contract"
+    },
+    {
+      "text": "returns [Ok] with the [destination]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "the specified [results] are empty, returns [Err] with an empty list",
+      "tag": "api-contract"
+    },
+    {
+      "text": "If the iterable is empty, returns [Err] with an empty list",
+      "tag": "api-contract"
+    },
+    {
+      "text": "returns [Err] with the [destination]",
+      "tag": "api-contract"
+    }
+  ],
+  "stale": []
+}

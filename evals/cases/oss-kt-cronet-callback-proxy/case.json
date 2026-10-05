@@ -1,0 +1,26 @@
+{
+  "file": "UrlRequestCallbackProxy.kt",
+  "commit_message": "Import UrlRequestCallbackProxy.kt",
+  "source": {
+    "repo": "https://github.com/dart-lang/http",
+    "commit": "47c57df399bf38927d2c9f047a1a5e3c049c0271",
+    "path": "pkgs/cronet_http/android/src/main/kotlin/io/flutter/plugins/cronet_http/UrlRequestCallbackProxy.kt",
+    "license": "BSD-3-Clause"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "Use of this source code is governed by a",
+      "tag": "untouchable"
+    },
+    {
+      "text": "does not support the ability to subclass abstract Java",
+      "tag": "constraint"
+    },
+    {
+      "text": "all of the parameters of this class are defined as nullable",
+      "tag": "workaround"
+    }
+  ],
+  "stale": []
+}

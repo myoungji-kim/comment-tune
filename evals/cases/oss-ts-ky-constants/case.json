@@ -1,0 +1,70 @@
+{
+  "file": "constants.ts",
+  "commit_message": "Import constants.ts",
+  "source": {
+    "repo": "https://github.com/sindresorhus/ky",
+    "commit": "0d59458a0a58e1c3d7c6db0ab17ed5c7cd671e47",
+    "path": "source/core/constants.ts",
+    "license": "MIT"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "@ts-expect-error - Types are outdated.",
+      "tag": "untouchable"
+    },
+    {
+      "text": "QQBrowser on iOS throwing \"unsupported BodyInit type\"",
+      "tag": "constraint"
+    },
+    {
+      "text": "We still feature-check at runtime before exposing the shortcut",
+      "tag": "constraint"
+    },
+    {
+      "text": "The maximum value of a 32bit int (see issue #117)",
+      "tag": "magic-number"
+    },
+    {
+      "text": "Size in bytes of a typical form boundary",
+      "tag": "magic-number"
+    },
+    {
+      "text": "returned by a `beforeRetry` hook to stop retrying without throwing",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Options for forcing a retry via `ky.retry()`.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Custom delays bypass jitter and `backoffLimit`",
+      "tag": "api-contract"
+    },
+    {
+      "text": "This machine-readable identifier will be included in the error message",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The error will be set as the `cause` of the `ForceRetryError`",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Custom retry requests are not sanitized",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Marker returned by `ky.retry()` to signal a forced retry",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The retry will respect the `retry.limit` option and skip the `shouldRetry` check",
+      "tag": "api-contract"
+    },
+    {
+      "text": "`dispatcher` and `priority` are NOT included here",
+      "tag": "constraint"
+    }
+  ],
+  "stale": []
+}

@@ -1,0 +1,67 @@
+{
+  "file": "LineWrapper.java",
+  "commit_message": "Import LineWrapper.java",
+  "source": {
+    "repo": "https://github.com/square/javapoet",
+    "commit": "b9017a9503b76e11b4ad4c1a9f050e2d29112cb0",
+    "path": "src/main/java/com/squareup/javapoet/LineWrapper.java",
+    "license": "Apache-2.0"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "Licensed under the Apache License, Version 2.0",
+      "tag": "untouchable"
+    },
+    {
+      "text": "Implements soft line wrapping on an appendable",
+      "tag": "api-contract"
+    },
+    {
+      "text": "-1 if we have no buffering; otherwise the number of",
+      "tag": "magic-number"
+    },
+    {
+      "text": "Null if we have no buffering; otherwise the type to pass",
+      "tag": "api-contract"
+    },
+    {
+      "text": "{@link Character#MIN_VALUE} if nothing emitted yet",
+      "tag": "api-contract"
+    },
+    {
+      "text": "This may be buffered to permit line wraps to be inserted",
+      "tag": "api-contract"
+    },
+    {
+      "text": "whether or not we have to wrap it later",
+      "tag": "rationale"
+    },
+    {
+      "text": "Emit either a space or a newline character",
+      "tag": "api-contract"
+    },
+    {
+      "text": "even though the space is deferred to next call to flush()",
+      "tag": "trap"
+    },
+    {
+      "text": "Emit a newline character if the line will exceed it's limit",
+      "tag": "api-contract"
+    },
+    {
+      "text": "forbid future writes to this line wrapper",
+      "tag": "api-contract"
+    },
+    {
+      "text": "records info about the chars passing through it",
+      "tag": "api-contract"
+    }
+  ],
+  "stale": [
+    {
+      "text": "Write the space followed by any buffered text",
+      "tag": "stale"
+    }
+  ]
+}

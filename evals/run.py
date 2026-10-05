@@ -25,6 +25,7 @@ new comment, code changed (must be no), tokens.
 """
 import argparse
 import datetime
+import fnmatch
 import json
 import os
 import pathlib
@@ -307,14 +308,17 @@ def main():
     ap.add_argument("--agent", choices=["claude", "codex"])
     ap.add_argument("--arm", choices=["skill", "baseline"], default="skill")
     ap.add_argument("--runs", type=int, default=1)
-    ap.add_argument("--case", action="append", help="case name; repeatable (default: all)")
+    ap.add_argument("--case", action="append",
+                    help="case name or glob such as 'oss-*'; repeatable (default: all)")
     ap.add_argument("--model")
     ap.add_argument("--keep", action="store_true", help="keep temp workspaces")
     ap.add_argument("--score", nargs=2, metavar=("CASE", "FILE"))
     ap.add_argument("--coverage", action="store_true")
     args = ap.parse_args()
 
-    names = args.case or sorted(p.name for p in CASES.iterdir() if (p / "case.json").exists())
+    names = sorted(p.name for p in CASES.iterdir() if (p / "case.json").exists())
+    if args.case:
+        names = [n for n in names if any(fnmatch.fnmatch(n, pat) for pat in args.case)]
     if args.selftest:
         return selftest(names)
     if args.coverage:

@@ -1,0 +1,75 @@
+{
+  "file": "window_handler.dart",
+  "commit_message": "Import window_handler.dart",
+  "source": {
+    "repo": "https://github.com/dart-lang/http",
+    "commit": "47c57df399bf38927d2c9f047a1a5e3c049c0271",
+    "path": "pkgs/http2/lib/src/flowcontrol/window_handler.dart",
+    "license": "BSD-3-Clause"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "Copyright (c) 2015, the Dart project authors",
+      "tag": "untouchable"
+    },
+    {
+      "text": "The flow control window size we use for sending data",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Process a window update frame received from the remote end",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Update the peer window by subtracting [numberOfBytes]",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Handles the connection window for outgoing data frames",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Handles the window for outgoing messages to the peer",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Update the peer window by adding [difference] to it",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Mirrors the flow control window the remote end is using",
+      "tag": "api-contract"
+    },
+    {
+      "text": "is `0` for connection level",
+      "tag": "magic-number"
+    },
+    {
+      "text": "The current size for the incoming data window",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Signals that we received [numberOfBytes] from the remote peer",
+      "tag": "api-contract"
+    },
+    {
+      "text": "If we pause and don't want to get more data, we have to",
+      "tag": "todo-with-reason"
+    },
+    {
+      "text": "This can be optimized by delaying the window update",
+      "tag": "todo-with-reason"
+    }
+  ],
+  "stale": [
+    {
+      "text": "The connection flow control window.",
+      "tag": "stale"
+    },
+    {
+      "text": "Indicates when the outgoing connection window turned positive",
+      "tag": "stale"
+    }
+  ]
+}

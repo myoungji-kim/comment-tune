@@ -1,0 +1,63 @@
+{
+  "file": "timed.py",
+  "commit_message": "Import timed.py",
+  "source": {
+    "repo": "https://github.com/pallets/itsdangerous",
+    "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+    "path": "src/itsdangerous/timed.py",
+    "license": "BSD-3-Clause"
+  },
+  "noise": [
+    {
+      "text": "Check timestamp is not older than max_age",
+      "tag": "restates"
+    }
+  ],
+  "context": [
+    {
+      "text": "also records the time of the signing and can be used to expire",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The function must return an integer",
+      "tag": "api-contract"
+    },
+    {
+      "text": "into an aware :class`datetime.datetime` in UTC",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Ignore overlapping signatures check, return_timestamp",
+      "tag": "workaround"
+    },
+    {
+      "exact": "# pyright: ignore",
+      "tag": "untouchable"
+    },
+    {
+      "text": "If ``return_timestamp`` is ``True`` the timestamp",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Windows raises OSError",
+      "tag": "constraint"
+    },
+    {
+      "text": "Signature is incompatible because parameters were added",
+      "tag": "todo-with-reason"
+    },
+    {
+      "exact": "# type: ignore[override]",
+      "tag": "untouchable"
+    },
+    {
+      "text": "Reverse of :meth:`dumps`, raises :exc:`.BadSignature`",
+      "tag": "api-contract"
+    },
+    {
+      "text": "expired. Do not try the next signer",
+      "tag": "rationale"
+    }
+  ],
+  "stale": []
+}

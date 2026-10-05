@@ -1,0 +1,54 @@
+{
+  "file": "signer.py",
+  "commit_message": "Import signer.py",
+  "source": {
+    "repo": "https://github.com/pallets/itsdangerous",
+    "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+    "path": "src/itsdangerous/signer.py",
+    "license": "BSD-3-Clause"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "Subclasses must implement :meth:`get_signature`",
+      "tag": "api-contract"
+    },
+    {
+      "text": "FIPS builds may not include",
+      "tag": "constraint"
+    },
+    {
+      "text": "The digest method to use with the MAC algorithm",
+      "tag": "api-contract"
+    },
+    {
+      "exact": "# pyright: ignore",
+      "tag": "untouchable"
+    },
+    {
+      "text": "A signer securely signs bytes, then unsigns them",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The default digest method to use for the signer",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The default scheme to use to derive the signing key",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The list of secret keys to try for verifying signatures",
+      "tag": "api-contract"
+    },
+    {
+      "text": "This is for compatibility from before key rotation",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Key derivation is not intended to be used as a security method",
+      "tag": "api-contract"
+    }
+  ],
+  "stale": []
+}

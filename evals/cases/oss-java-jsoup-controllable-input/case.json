@@ -1,0 +1,112 @@
+{
+  "file": "ControllableInputStream.java",
+  "commit_message": "Import ControllableInputStream.java",
+  "source": {
+    "repo": "https://github.com/jhy/jsoup",
+    "commit": "088614f4a1454232a1f03c63b7f80742f1f2a854",
+    "path": "src/main/java/org/jsoup/internal/ControllableInputStream.java",
+    "license": "MIT"
+  },
+  "noise": [
+    {
+      "exact": "// emits a progress",
+      "tag": "restates"
+    },
+    {
+      "exact": "// completed",
+      "tag": "restates"
+    },
+    {
+      "text": "Prepare the buffer for reading",
+      "tag": "restates"
+    },
+    {
+      "text": "update remaining to reflect the difference in the new maxsize",
+      "tag": "restates"
+    },
+    {
+      "text": "calculate percent complete if contentLength > 0",
+      "tag": "restates"
+    }
+  ],
+  "context": [
+    {
+      "text": "there is no contract API",
+      "tag": "api-contract"
+    },
+    {
+      "text": "extending BufferedInputStream will pin threads during read",
+      "tag": "constraint"
+    },
+    {
+      "text": "avoids allocation when routing single-byte reads",
+      "tag": "rationale"
+    },
+    {
+      "text": "expected content length for progress; -1 == unknown",
+      "tag": "magic-number"
+    },
+    {
+      "text": "input will create an empty wrapped stream",
+      "tag": "api-contract"
+    },
+    {
+      "text": "or just deprecate if always DefaultBufferSize",
+      "tag": "todo-with-reason"
+    },
+    {
+      "text": "interrupted latches, because parse() may call twice",
+      "tag": "rationale"
+    },
+    {
+      "text": "saturate until that is available",
+      "tag": "todo-with-reason"
+    },
+    {
+      "text": "implemented here so our cap accounting aligns",
+      "tag": "rationale"
+    },
+    {
+      "text": "The supplied max may be less than the inputstream's max",
+      "tag": "api-contract"
+    },
+    {
+      "text": "not synchronized in later JDKs",
+      "tag": "rationale"
+    },
+    {
+      "text": "There may still content in buffers to be consumed",
+      "tag": "api-contract"
+    },
+    {
+      "text": "how far at most will be read from the underlying stream",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Check if content remains beyond the configured cap",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Returns whether content was found beyond the configured cap",
+      "tag": "api-contract"
+    },
+    {
+      "text": "subsequent buffer hits don't report 100 again",
+      "tag": "rationale"
+    },
+    {
+      "text": "this, not buff, so that return is constrained",
+      "tag": "trap"
+    }
+  ],
+  "stale": [
+    {
+      "exact": "// bufferSize currently unused; consider implementing as a min size in the SoftPool recycler",
+      "tag": "stale"
+    },
+    {
+      "text": "the buffer size to use when reading",
+      "tag": "stale"
+    }
+  ]
+}

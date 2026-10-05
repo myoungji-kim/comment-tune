@@ -81,6 +81,12 @@ stale comments fixed, expected comments added, no comments at forbidden
 spots (clean code, numbers with no known reason), code changes (must be 0),
 tokens. Agent runs take minutes and real tokens each; run them in a sandbox.
 
+Cases come in two sets. The seeded cases are written to cover every criteria
+tag. The `oss-*` cases are unmodified files from permissive open-source
+projects (source commit and license in each folder) and measure how often
+real comments worth keeping get deleted. Their labels are drafts: review each
+case's `labels.md` before trusting a score. Pick a set with `--case 'oss-*'`.
+
 ## License
 
 MIT

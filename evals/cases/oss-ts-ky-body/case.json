@@ -1,0 +1,54 @@
+{
+  "file": "body.ts",
+  "commit_message": "Import body.ts",
+  "source": {
+    "repo": "https://github.com/sindresorhus/ky",
+    "commit": "0d59458a0a58e1c3d7c6db0ab17ed5c7cd671e47",
+    "path": "source/utils/body.ts",
+    "license": "MIT"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "eslint-disable-next-line @typescript-eslint/no-restricted-types",
+      "tag": "untouchable"
+    },
+    {
+      "text": "This is an approximation, as FormData size calculation",
+      "tag": "rationale"
+    },
+    {
+      "text": "Avoid reporting 100% progress before the stream is actually finished",
+      "tag": "rationale"
+    },
+    {
+      "text": "If we were to use 0.99 here, percent could potentially go backwards",
+      "tag": "rationale"
+    },
+    {
+      "text": "Chromium replaces stream errors with a generic TypeError",
+      "tag": "workaround"
+    },
+    {
+      "text": "The `Response` constructor cannot set these",
+      "tag": "constraint"
+    },
+    {
+      "text": "Keep the shim replaceable like `Response.prototype.clone`",
+      "tag": "rationale"
+    },
+    {
+      "text": "Cloning replaces the original body too",
+      "tag": "trap"
+    },
+    {
+      "text": "Use original body for size calculation since request.body",
+      "tag": "rationale"
+    },
+    {
+      "text": "@ts-expect-error - Types are outdated.",
+      "tag": "untouchable"
+    }
+  ],
+  "stale": []
+}

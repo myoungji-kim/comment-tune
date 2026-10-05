@@ -1,0 +1,52 @@
+{
+  "file": "exponential.go",
+  "commit_message": "Import exponential.go",
+  "source": {
+    "repo": "https://github.com/cenkalti/backoff",
+    "commit": "b1a30d947ca896d37518610255281904b439c619",
+    "path": "exponential.go",
+    "license": "MIT"
+  },
+  "noise": [
+    {
+      "text": "make sure no randomness is used when randomizationFactor is 0",
+      "tag": "restates"
+    }
+  ],
+  "context": [
+    {
+      "text": "Note: Implementation is not thread-safe.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Default values for ExponentialBackOff.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "creates an instance of ExponentialBackOff using default values",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Randomized interval = RetryInterval * (1 ± RandomizationFactor)",
+      "tag": "api-contract"
+    },
+    {
+      "text": "we want a 33% chance for selecting either 1, 2 or 3",
+      "tag": "magic-number"
+    },
+    {
+      "text": "rounds up to 2^63, which does not fit in a Duration",
+      "tag": "trap"
+    }
+  ],
+  "stale": [
+    {
+      "text": "and restarts the timer",
+      "tag": "stale"
+    },
+    {
+      "text": "Reset must be called before using b.",
+      "tag": "stale"
+    }
+  ]
+}
