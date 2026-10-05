@@ -12,7 +12,8 @@ Run these in order for each existing comment and stop at the first that hits.
    remove it if the true version would be a trim.
 3. **Does it say anything the code can't?**
    - Nothing → `trim`: remove.
-   - Partly → `trim`: rewrite down to the part that matters, one line.
+   - Partly → `trim`: rewrite down to every part that matters, cutting only
+     what the code already says.
 4. **Otherwise** → keep.
 
 Then look at the code in scope for **fill** spots that have no comment.
@@ -24,7 +25,7 @@ Then look at the code in scope for **fill** spots that have no comment.
 | `restates` | Says what the next line says. `// increment count`, `/** Gets the user. */` on `getUser()` |
 | `narration` | Describes the edit, not the code. "added", "updated", "now uses", "new", "as requested", "per review", "fixed bug where" |
 | `history` | The author's reason for a change, or what the code used to do. "we switched from X because", "previously", "used to", "the old version" |
-| `verbose` | A true, useful point buried in several lines. Rewrite to one line |
+| `verbose` | One useful point buried in lines that restate the code or repeat themselves. Rewrite to that point, one line. Not verbose when each line adds its own fact: a reason, an example, an edge case, a link |
 | `dead-code` | Commented-out code. Version control keeps it |
 | `banner` | Decorative lines and section headers: `// ======`, `// ---- Helpers ----` |
 | `bare-todo` | TODO/FIXME with no reason, owner, issue or trigger |
@@ -86,7 +87,10 @@ Never remove or rewrite:
 
 ## Rewrites
 
-- One line. Present tense. Describe the code, not the edit.
+- One line by default. Present tense. Describe the code, not the edit.
+- Never drop a fact the original gave that the code can't show: a reason,
+  an example, an edge case, a version, a link. If they don't fit on one
+  line, use more lines; if shortening would lose one, keep the original.
 - Keep the comment's original style (`//` vs `/* */` vs `///` vs Javadoc).
 - Keep the language of the codebase's existing comments.
 - Put a comment directly above the line it explains, not at the end of a

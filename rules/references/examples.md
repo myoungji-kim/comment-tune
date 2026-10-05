@@ -37,6 +37,15 @@ on every build."
 `rewrite` · `verbose` →
 `/** Discount is applied after tax (accounting requirement). */`
 
+```kotlin
+// Room runs this migration in a transaction, so the copy and the rename land
+// together or not at all. SQLite before 3.25 can't rename columns, hence the
+// copy instead of ALTER TABLE ... RENAME COLUMN. Keep the old table until the
+// next release: v4.1 clients still read it.
+```
+`keep`. Long, but every sentence is a separate fact the code can't show.
+Squeezing it to one line would drop at least one of them.
+
 ```ts
 // const legacy = await fetchLegacy(id);
 // if (legacy) return legacy;
