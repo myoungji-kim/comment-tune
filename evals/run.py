@@ -209,6 +209,7 @@ def workspace(case):
     shutil.copy(CASES / case["name"] / "input" / case["file"], ws / case["file"])
     git = ["git", "-c", "user.name=eval", "-c", "user.email=eval@example.com"]
     subprocess.run(["git", "init", "-q"], cwd=ws, check=True)
+    subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=ws, check=True)
     subprocess.run(git + ["add", "."], cwd=ws, check=True)
     subprocess.run(git + ["commit", "-q", "-m", case["commit_message"]], cwd=ws, check=True)
     return ws
@@ -216,13 +217,15 @@ def workspace(case):
 
 def run_claude(ws, case, arm, model):
     prompt = (SKILL_PROMPT["claude"] if arm == "skill" else BASELINE_PROMPT).format(file=case["file"])
-    cmd = ["claude", "-p", prompt, "--output-format", "json",
+    # User settings would load the user's own plugins and hooks into both arms.
+    cmd = ["claude", "-p", prompt, "--output-format", "json", "--setting-sources", "project",
+           "--no-session-persistence",
            "--permission-mode", "acceptEdits", "--allowedTools", "Bash,Read,Edit,Write,Glob,Grep"]
     if arm == "skill":
         cmd += ["--plugin-dir", str(ROOT)]
     if model:
         cmd += ["--model", model]
-    proc = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, timeout=900)
+    proc = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, encoding="utf-8", timeout=900)
     try:
         result = json.loads(proc.stdout)
     except json.JSONDecodeError:
@@ -243,7 +246,7 @@ def run_codex(ws, case, arm, model):
     cmd = ["codex", "exec", "--json", "--full-auto", prompt]
     if model:
         cmd[2:2] = ["--model", model]
-    proc = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, timeout=900)
+    proc = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, encoding="utf-8", timeout=900)
     tokens, report = 0, None
     for line in proc.stdout.splitlines():
         try:
