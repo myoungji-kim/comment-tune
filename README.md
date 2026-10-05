@@ -74,9 +74,11 @@ python3 evals/run.py --selftest                       # scorer sanity check, off
 python3 evals/run.py --coverage                       # case items per tag; flags thin spots
 python3 evals/run.py --agent claude --arm skill       # real headless runs
 python3 evals/run.py --agent claude --arm baseline    # same agent, no plugin
+python3 evals/run.py --rescore evals/results/RUN.json # rescore saved outputs
 ```
 
-Metrics: noise removed, context comments kept (the one that matters most),
+Metrics: noise removed, context comments kept verbatim and not deleted (the
+pair that matters most; a rewrite in place counts as not deleted),
 stale comments fixed, expected comments added, no comments at forbidden
 spots (clean code, numbers with no known reason), code changes (must be 0),
 tokens. Agent runs take minutes and real tokens each; run them in a sandbox.

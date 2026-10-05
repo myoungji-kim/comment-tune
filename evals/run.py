@@ -14,12 +14,17 @@
     python3 evals/run.py --score CASE FILE
         Score one output file against a case.
 
+    python3 evals/run.py --rescore evals/results/RUN.json
+        Score the outputs an agent run saved again, after the cases or the
+        scorer change. Each agent run saves its outputs next to its JSON.
+
     python3 evals/run.py --coverage
         Count case items per criteria tag and language, and flag tags with
         too few items to trust a score on.
 
-Metrics per case: noise removed, context kept (the one that matters most:
-a tool that deletes the comments worth keeping is worse than none), stale
+Metrics per case: noise removed, context kept verbatim and context survived
+(not deleted; kept or rewritten in place), the pair that matters most since a
+tool that deletes the comments worth keeping is worse than none; stale
 comments fixed, expected comments present, forbidden spots left without a
 new comment, code changed (must be no), tokens.
 """
@@ -101,16 +106,54 @@ def read_comments(path):
     return src, comments
 
 
+def owners(path, src, comments):
+    """For each comment, the index of the code line it belongs to: the line it trails, or the next one.
+
+    Code is identical before and after a comment-only edit, so the same index
+    names the same spot in both versions of a file.
+    """
+    lines = src.splitlines()
+    comment_only = set()
+    for ln, text in comment_guard.split(str(path), src)[1]:
+        trailing = lines[ln - 1].split(text.split("\n", 1)[0], 1)[0].strip() != ""
+        comment_only.update(range(ln + trailing, ln + text.count("\n") + 1))
+    code = [i + 1 for i, l in enumerate(lines) if l.strip() and i + 1 not in comment_only]
+    index = {n: k for k, n in enumerate(code)}
+    return [index[ln] if ln in index
+            else next((index[n] for n in code if n > ln + t.count("\n")), len(code))
+            for ln, t in comments]
+
+
 def score(case, out_path, in_path=None):
     in_path = in_path or CASES / case["name"] / "input" / case["file"]
     src, comments = read_comments(out_path)
-    texts = [norm(t) for _, t in comments]
-    before = {norm(t) for _, t in read_comments(in_path)[1]}
+    in_src, in_comments = read_comments(in_path)
+    before = {norm(t) for _, t in in_comments}
+
+    def matches(item, text):
+        if "exact" in item:
+            return norm(item["exact"]) == norm(text)
+        return norm(item["text"]) in norm(text)
 
     def present(item):
-        if "exact" in item:
-            return norm(item["exact"]) in texts
-        return any(norm(item["text"]) in t for t in texts)
+        return any(matches(item, t) for _, t in comments)
+
+    # Spots where the output has a comment the input didn't: a rewrite lands on one of these.
+    rewritten_at = {o for (_, t), o in zip(comments, owners(out_path, src, comments))
+                    if norm(t) not in before}
+    in_owner = owners(in_path, in_src, in_comments)
+
+    def survived(item):
+        """Kept verbatim, or its spot holds a changed comment.
+
+        An upper bound: a rewrite that drops the point, a partial delete of a
+        multi-line comment, or a deletion beside another rewrite all pass.
+        Whether a rewrite kept the meaning needs a judge, not this scorer.
+        """
+        if present(item):
+            return True
+        return any(matches(item, t) and o in rewritten_at
+                   for (_, t), o in zip(in_comments, in_owner))
 
     lines = src.splitlines()
     # A leftover noise or stale comment can't count as the expected one.
@@ -139,6 +182,7 @@ def score(case, out_path, in_path=None):
     checks = {
         "noise_removed": ("noise", lambda n: not present(n)),
         "context_kept": ("context", present),
+        "context_survived": ("context", survived),
         "stale_fixed": ("stale", lambda s: not present(s)),
         "expected_comments": ("expect_comment", has_comment),
         "forbid_respected": ("forbid_comment", left_alone),
@@ -273,16 +317,33 @@ def run_codex(ws, case, arm, model):
     return tokens or None, report
 
 
+def summarize(rows):
+    metrics = [k for k, v in rows[0].items() if isinstance(v, list)] if rows else []
+    total = {k: [sum(r[k][0] for r in rows), sum(r[k][1] for r in rows)] for k in metrics}
+    summary = {k: f"{v[0]}/{v[1]} ({v[0] / v[1]:.0%})" for k, v in total.items() if v[1]}
+    summary["runs_with_code_changes"] = sum(r["code_changed"] for r in rows)
+    counted = [r["tokens"] for r in rows if r["tokens"]]
+    summary["avg_tokens"] = round(sum(counted) / len(counted)) if counted else None
+    return summary
+
+
 def run_agent(args, names):
     runner = {"claude": run_claude, "codex": run_codex}[args.agent]
+    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_dir = RESULTS / f"{stamp}-{args.agent}-{args.arm}"
     rows = []
     for name in names:
         case = load_case(name)
         for i in range(args.runs):
             ws = workspace(case)
             tokens, report = runner(ws, case, args.arm, args.model)
-            s = score(case, ws / case["file"])
-            s.update(case=name, run=i + 1, tokens=tokens, report=report)
+            # Keep the output so a later scorer can rescore it without another agent run.
+            saved = run_dir / f"{name}-{i + 1}" / case["file"]
+            saved.parent.mkdir(parents=True)
+            shutil.copy(ws / case["file"], saved)
+            s = score(case, saved)
+            s.update(case=name, run=i + 1, tokens=tokens, report=report,
+                     output=saved.relative_to(ROOT).as_posix())
             rows.append(s)
             print(f"{name} #{i + 1}: {fmt(s)}", flush=True)
             if not args.keep:
@@ -290,22 +351,31 @@ def run_agent(args, names):
             else:
                 print(f"  kept: {ws}")
 
-    total = {k: [sum(r[k][0] for r in rows), sum(r[k][1] for r in rows)]
-             for k in ("noise_removed", "context_kept", "stale_fixed", "expected_comments",
-                       "forbid_respected")}
-    summary = {k: f"{v[0]}/{v[1]} ({v[0] / v[1]:.0%})" for k, v in total.items() if v[1]}
-    summary["runs_with_code_changes"] = sum(r["code_changed"] for r in rows)
-    counted = [r["tokens"] for r in rows if r["tokens"]]
-    summary["avg_tokens"] = round(sum(counted) / len(counted)) if counted else None
+    summary = summarize(rows)
     print(json.dumps(summary, indent=2))
-
-    RESULTS.mkdir(exist_ok=True)
-    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    out = RESULTS / f"{stamp}-{args.agent}-{args.arm}.json"
+    out = run_dir.with_suffix(".json")
     out.write_text(json.dumps({"agent": args.agent, "arm": args.arm, "model": args.model,
                                "summary": summary, "runs": rows}, indent=2) + "\n")
     print(f"saved {out.relative_to(ROOT)}")
     return 1 if summary["runs_with_code_changes"] else 0
+
+
+def rescore(path):
+    """Score the saved outputs of an earlier agent run again, with the current cases and scorer."""
+    data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+    rows = []
+    for old in data["runs"]:
+        if "output" not in old:
+            sys.exit(f"{path} predates saved outputs; rerun the agent")
+        s = score(load_case(old["case"]), ROOT / old["output"])
+        s.update(case=old["case"], run=old["run"], tokens=old["tokens"], report=old["report"],
+                 output=old["output"])
+        rows.append(s)
+        print(f"{old['case']} #{old['run']}: {fmt(s)}")
+    data.update(summary=summarize(rows), runs=rows)
+    print(json.dumps(data["summary"], indent=2))
+    pathlib.Path(path).write_text(json.dumps(data, indent=2) + "\n")
+    return 0
 
 
 def main():
@@ -320,6 +390,7 @@ def main():
     ap.add_argument("--keep", action="store_true", help="keep temp workspaces")
     ap.add_argument("--score", nargs=2, metavar=("CASE", "FILE"))
     ap.add_argument("--coverage", action="store_true")
+    ap.add_argument("--rescore", metavar="RESULT_JSON")
     args = ap.parse_args()
 
     names = sorted(p.name for p in CASES.iterdir() if (p / "case.json").exists())
@@ -329,6 +400,8 @@ def main():
         return selftest(names)
     if args.coverage:
         return coverage(names)
+    if args.rescore:
+        return rescore(args.rescore)
     if args.score:
         s = score(load_case(args.score[0]), args.score[1])
         print(fmt(s))
