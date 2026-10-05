@@ -6,7 +6,10 @@
     comment_guard.py compare OLD NEW    compare two files directly
     comment_guard.py comments FILE      print the comments of FILE as JSON
 
-Exit status: 0 when no code changed, 1 when some did, 2 on usage errors.
+Exit status: 0 when no code changed, 1 when some did, 2 on usage errors or
+when a file can't be checked. A file using syntax the lexer doesn't model
+(see UNMODELED) is reported as `unchecked (reason)` and left out of the
+snapshot; check its diff by hand.
 Whitespace is ignored, so re-indenting or reflowing around a comment is fine.
 Standard library only, so the skill runs anywhere python3 does.
 """
@@ -14,6 +17,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -47,7 +51,6 @@ C_LIKE = {
     ".cs": ('"', "'"),
     ".swift": ('"""', '"'),
     ".rs": ('"',),  # ' is also a lifetime marker in Rust
-    ".php": ('"', "'"),
     ".css": ('"', "'"),
     ".scss": ('"', "'"),
     ".less": ('"', "'"),
@@ -64,7 +67,46 @@ HASH = {
     ".r": ('"', "'"),
     ".pl": ('"', "'"),
 }
-SUPPORTED = set(C_LIKE) | set(HASH) | {".py"}
+SUPPORTED = set(C_LIKE) | set(HASH) | {".py", ".php"}
+
+JS_LIKE = (".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts")
+# A regex literal starts where a value is expected: after an operator, an
+# opening bracket, or `return`. Division can't follow those, so this is not
+# fooled by `a / b / c`.
+_JS_REGEX = (r"(?:^|[=(,:!&|?{};\[]|\breturn)\s*/(?![/*\s])"
+             r"((?:\\.|\[(?:\\.|[^\]\n])*\]|[^/\\\n\[])+)/[a-z]*")
+# Syntax the generic lexer doesn't model. A file that uses any of it gets no
+# fingerprint: a wrong "ok" is worse than an honest "can't check".
+UNMODELED = {
+    **{ext: [("regex literal with a comment marker or quote",
+              lambda s: any(re.search(r"//|/\*|['\"`]", s[m.start(1) - 1:m.end()])
+                            for m in re.finditer(_JS_REGEX, s, re.M))),
+             ("backtick inside a template ${...}", r"\$\{[^}`\n]*`")] for ext in JS_LIKE},
+    ".rs": [("raw string", r"\br#*\""), ("'\"' char literal", r"'\"'")],
+    ".cs": [("verbatim or raw string", r"@\"|\"\"\""),
+            ("quote inside an interpolation hole", r"\$@?\"[^\"\n]*\{[^}\n]*\"")],
+    ".swift": [("raw string", r"#+\"")],
+    ".dart": [("raw string", r"\br['\"]")],
+    ".c": [("raw string", r"\bR\"[^(\s]*\(")],
+    ".cc": [("raw string", r"\bR\"[^(\s]*\(")],
+    ".cpp": [("raw string", r"\bR\"[^(\s]*\(")],
+    ".h": [("raw string", r"\bR\"[^(\s]*\(")],
+    ".hpp": [("raw string", r"\bR\"[^(\s]*\(")],
+    ".groovy": [("dollar-slashy string", r"\$/")],
+    ".gradle": [("dollar-slashy string", r"\$/")],
+    ".scss": [("unquoted url with //", r"url\(\s*[^'\")\s]*//")],
+    ".less": [("unquoted url with //", r"url\(\s*[^'\")\s]*//")],
+    ".rb": [("heredoc", r"<<[~-]?['\"]?[A-Za-z_]"), ("=begin block", r"^=begin"),
+            ("percent literal", r"%[qQwWiIrsx]?[{(\[<|!/]")],
+    ".sh": [("heredoc", r"<<-?\s*['\"]?\w")],
+    ".bash": [("heredoc", r"<<-?\s*['\"]?\w")],
+    ".zsh": [("heredoc", r"<<-?\s*['\"]?\w")],
+    ".pl": [("heredoc", r"<<~?['\"]?\w"), ("POD block", r"^=\w")],
+    ".yml": [("block scalar", r":\s*[|>][-+0-9]*\s*(#.*)?$")],
+    ".yaml": [("block scalar", r":\s*[|>][-+0-9]*\s*(#.*)?$")],
+    ".r": [("raw string", r"\b[rR]['\"]-*[(\[{]")],
+}
+NESTED_BLOCK_COMMENTS = {".rs", ".swift", ".kt", ".kts", ".scala", ".dart"}
 
 
 def _skip_string(src, i, delims):
@@ -94,7 +136,7 @@ def _lex(src, delims, line_marker, block):
             code.append(src[i:end])
             i = end
             continue
-        if src.startswith(line_marker, i) and _hash_starts_comment(src, i, line_marker):
+        if line_marker and src.startswith(line_marker, i) and _hash_starts_comment(src, i, line_marker):
             j = src.find("\n", i)
             j = n if j < 0 else j
             comments.append((src.count("\n", 0, i) + 1, src[i:j]))
@@ -140,6 +182,82 @@ def _lex_python(src):
     return " ".join(code), comments
 
 
+_PHP_OPEN = re.compile(r"<\?(?:php\b|=|(?=\s))")
+_PHP_HEREDOC = re.compile(r"<<<[ \t]*(['\"]?)([A-Za-z_]\w*)\1\r?\n")
+_PHP_STRING = re.compile(r"'(?:\\.|[^'\\])*'|\"(?:\\.|[^\"\\])*\"|`(?:\\.|[^`\\])*`", re.S)
+
+
+def _lex_php(src):
+    """PHP: inline HTML outside <?php ... ?> is code, # and // end at ?>, strings span lines."""
+    code, comments = [], []
+    i, n, html = 0, len(src), True
+    while i < n:
+        if html:
+            m = _PHP_OPEN.search(src, i)
+            j = n if m is None else m.end()
+            code.append(src[i:j])
+            i, html = j, False
+            continue
+        if src.startswith("?>", i):
+            code.append("?>")
+            i, html = i + 2, True
+            continue
+        m = _PHP_HEREDOC.match(src, i)
+        if m:
+            # The closing marker may be indented (PHP 7.3+) and followed by `;`, `,` or `)`.
+            end = re.compile(r"^[ \t]*" + re.escape(m[2]) + r"\b", re.M).search(src, m.end())
+            j = n if end is None else end.end()
+            code.append(src[i:j])
+            i = j
+            continue
+        m = _PHP_STRING.match(src, i)
+        if m:
+            code.append(m[0])
+            i = m.end()
+            continue
+        if src.startswith("//", i) or (src[i] == "#" and not src.startswith("#[", i)):
+            j = i
+            while j < n and src[j] != "\n" and not src.startswith("?>", j):
+                j += 1
+            comments.append((src.count("\n", 0, i) + 1, src[i:j]))
+            code.append(" ")
+            i = j
+            continue
+        if src.startswith("/*", i):
+            j = src.find("*/", i + 2)
+            j = n if j < 0 else j + 2
+            comments.append((src.count("\n", 0, i) + 1, src[i:j]))
+            code.append(" " + "\n" * src.count("\n", i, j))
+            i = j
+            continue
+        code.append(src[i])
+        i += 1
+    return "".join(code), comments
+
+
+def unchecked_reason(path, src=None):
+    """Why this file's code can't be fingerprinted reliably, or None when it can."""
+    if src is None:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            src = f.read()
+    ext = os.path.splitext(path)[1].lower()
+    if ext not in SUPPORTED:
+        return "unsupported type"
+    if ext == ".py":
+        try:
+            _lex_python(src)
+        except (tokenize.TokenError, IndentationError, SyntaxError):
+            return "Python that tokenize can't read"
+        return None
+    for name, test in UNMODELED.get(ext, []):
+        if test(src) if callable(test) else re.search(test, src, re.M):
+            return name
+    if ext in NESTED_BLOCK_COMMENTS:
+        if any(t.startswith("/*") and "/*" in t[2:] for _, t in split(path, src)[1]):
+            return "nested block comment"
+    return None
+
+
 def split(path, src=None):
     """Return (code_without_comments, [(line, comment_text), ...])."""
     if src is None:
@@ -151,8 +269,11 @@ def split(path, src=None):
             return _lex_python(src)
         except (tokenize.TokenError, IndentationError, SyntaxError):
             return _lex(src, ('"""', "'''", '"', "'"), "#", None)
+    if ext == ".php":
+        return _lex_php(src)
     if ext in C_LIKE:
-        return _lex(src, C_LIKE[ext], "//", ("/*", "*/"))
+        # Plain CSS has no line comments: `//` there is usually part of a URL.
+        return _lex(src, C_LIKE[ext], None if ext == ".css" else "//", ("/*", "*/"))
     if ext in HASH:
         return _lex(src, HASH[ext], "#", None)
     raise ValueError(f"unsupported file type: {path}")
@@ -182,15 +303,16 @@ def main(argv):
     if cmd == "snapshot":
         state, skipped = {}, []
         for p in args:
-            if os.path.splitext(p)[1].lower() in SUPPORTED:
-                state[os.path.abspath(p)] = fingerprint(p)
+            reason = unchecked_reason(p)
+            if reason:
+                skipped.append((p, reason))
             else:
-                skipped.append(p)
+                state[os.path.abspath(p)] = fingerprint(p)
         with open(_state_path(), "w") as f:
             json.dump(state, f)
         print(f"snapshot: {len(state)} file(s)")
-        for p in skipped:
-            print(f"unchecked (unsupported type): {p}")
+        for p, reason in skipped:
+            print(f"unchecked ({reason}): {p}")
         return 0
 
     if cmd == "verify":
@@ -210,6 +332,10 @@ def main(argv):
         return 1 if changed else 0
 
     if cmd == "compare" and len(args) == 2:
+        reason = unchecked_reason(args[0]) or unchecked_reason(args[1])
+        if reason:
+            print(f"unchecked ({reason})")
+            return 2
         same = fingerprint(args[0]) == fingerprint(args[1])
         print("ok: code unchanged" if same else "CODE CHANGED")
         return 0 if same else 1

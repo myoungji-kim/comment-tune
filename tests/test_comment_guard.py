@@ -42,6 +42,69 @@ class Lexing(unittest.TestCase):
         with self.assertRaises(ValueError):
             comment_guard.split("a.unknownext", "")
 
+    def test_css_has_no_line_comments(self):
+        self.assertEqual(comments("a.css", "a { background: url(http://x/y.png); } /* c */\n"),
+                         ["/* c */"])
+
+
+PHP = """<p>// html, not a comment</p>
+<?php
+# hash
+#[Attribute]
+class A {
+    public $u = "http://x"; // trailing
+    public $m = 'one
+// still the string';
+    function f() {
+        $s = <<<EOT
+        // inside a heredoc
+        EOT;
+        $t = <<<'NOW'
+        # inside a nowdoc
+        NOW;
+        return $s; // ends here ?> <b>// html again</b> <?php
+    }
+}
+"""
+
+
+class Php(unittest.TestCase):
+    def test_comments(self):
+        self.assertEqual(comments("a.php", PHP), ["# hash", "// trailing", "// ends here "])
+
+    def test_editing_comments_keeps_code(self):
+        edited = PHP.replace("# hash\n", "").replace(" // trailing", "")
+        self.assertTrue(same_code("a.php", PHP, edited))
+
+    def test_code_that_looks_like_comments_counts(self):
+        for old, new in [("// inside a heredoc", "// CHANGED"), ("# inside a nowdoc", "# CHANGED"),
+                         ("// still the string", "// CHANGED"), ("// html again", "// CHANGED"),
+                         ("// html, not", "// CHANGED,"), ("#[Attribute]\n", "")]:
+            self.assertFalse(same_code("a.php", PHP, PHP.replace(old, new)), old)
+
+
+class Unchecked(unittest.TestCase):
+    def test_modelled_files_are_checked(self):
+        for name, src in [("a.ts", "const r = a / b / c; // ok\n"), ("a.rs", "fn f<'a>() {}\n"),
+                          ("a.php", PHP), ("a.py", "x = 1\n"), ("a.yml", "a: b # c\n")]:
+            self.assertIsNone(comment_guard.unchecked_reason(name, src), name)
+
+    def test_unmodelled_syntax_is_reported(self):
+        for name, src in [("a.ts", "const r = /\\/\\//g;\n"),
+                          ("a.ts", "const t = `${`inner`}`;\n"),
+                          ("a.rs", 'let s = r#"// x"#;\n'),
+                          ("a.rs", "/* outer /* inner */ still */\n"),
+                          ("a.cs", 'var s = @"C:\\dir\\";\n'),
+                          ("a.swift", 'let s = #"\\(x)"#\n'),
+                          ("a.dart", "var s = r'\\';\n"),
+                          ("a.cpp", 'auto s = R"(// x)";\n'),
+                          ("a.rb", "s = <<~EOS\n  # x\nEOS\n"),
+                          ("a.sh", "cat <<EOF\n# x\nEOF\n"),
+                          ("a.yml", "run: |\n  echo # x\n"),
+                          ("a.py", "def f(:\n"),
+                          ("a.unknownext", "")]:
+            self.assertIsNotNone(comment_guard.unchecked_reason(name, src), (name, src))
+
 
 class Fingerprint(unittest.TestCase):
     def test_comment_edits_do_not_count(self):
@@ -68,6 +131,8 @@ class Cli(unittest.TestCase):
             self.assertEqual(comment_guard.main(["compare", str(a), str(b)]), 0)
             b.write_text("let x = 2;\n")
             self.assertEqual(comment_guard.main(["compare", str(a), str(b)]), 1)
+            b.write_text("let r = /\\/\\//;\n")
+            self.assertEqual(comment_guard.main(["compare", str(a), str(b)]), 2)
 
 
 if __name__ == "__main__":

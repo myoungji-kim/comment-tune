@@ -42,6 +42,9 @@ Tune comments in one pass: **trim** the noise, **fill** missing context,
    - Before editing: `python3 <dir>/scripts/comment_guard.py snapshot FILE...`,
      where `<dir>` is the directory this SKILL.md was loaded from. Windows
      often has no `python3`; try `py -3`, then `python`, before giving up.
+     A file it reports as `unchecked (reason)` uses syntax the guard can't
+     read safely: check that file's `git diff` yourself after editing, and
+     say so in the report.
    - Edit comments only.
    - After editing: `<python> <dir>/scripts/comment_guard.py verify`, with
      the same interpreter. If it reports `CODE CHANGED`, revert that file's
