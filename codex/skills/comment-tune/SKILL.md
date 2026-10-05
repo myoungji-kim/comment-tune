@@ -40,12 +40,13 @@ Tune comments in one pass: **trim** the noise, **fill** missing context,
    The user may approve all, approve by number, or edit a proposal.
 6. **Apply** the approved items:
    - Before editing: `python3 <dir>/scripts/comment_guard.py snapshot FILE...`,
-     where `<dir>` is the directory this SKILL.md was loaded from.
+     where `<dir>` is the directory this SKILL.md was loaded from. Windows
+     often has no `python3`; try `py -3`, then `python`, before giving up.
    - Edit comments only.
-   - After editing: `python3 <dir>/scripts/comment_guard.py verify`.
-     If it reports `CODE CHANGED`, revert that file's edits and redo them.
-     Without python3, check `git diff` yourself: only comment lines may
-     differ.
+   - After editing: `<python> <dir>/scripts/comment_guard.py verify`, with
+     the same interpreter. If it reports `CODE CHANGED`, revert that file's
+     edits and redo them. With no Python at all, check `git diff` yourself:
+     only comment lines may differ.
 7. **Finish** with the commit message draft and one line of totals.
 
 ## Report format
