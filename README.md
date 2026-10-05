@@ -23,6 +23,11 @@ missing context, fix stale ones. It never changes code.
 3. One line, or none.
 4. Keep comments true.
 
+The detailed judgment rules (`rules/references/criteria.md`) follow the
+comment chapter of Robert C. Martin's *Clean Code*, with one exception: doc
+comments on public API are never removed, even when they only restate the name,
+because IDEs and doc tools show them to callers.
+
 ## Install
 
 ```
@@ -37,11 +42,81 @@ Without the plugin, copy `AGENTS.md` into your project, or its content into a
 
 | | command |
 |---|---|
+| audit a repo, read-only | `/comment-tune-audit` |
+| audit some directories | `/comment-tune-audit src/ app/` |
 | tune the current diff | `/comment-tune` |
 | tune paths | `/comment-tune src/order` |
 | narrow the scope | `--trim-only`, `--fill-only`, `--fix-only` |
 | apply without asking | `--apply` |
-| audit a repo | `/comment-tune-audit` |
+
+Start with the audit, then tune the directories it points to. Tuning a whole
+large repo in one run makes a report too long to review.
+
+## Results
+
+Measured with Claude Code in headless mode, the user's own plugins and settings
+left out. Scores come from `evals/run.py`; numbers are totals over all runs.
+
+**Against the same model with a plain "clean up the comments" prompt**, on 12
+real open-source files, 3 runs each:
+
+| | comment-tune | plain prompt |
+|---|---|---|
+| comments rewritten or added | 57 | 342 |
+| inaccurate or invented statements written (blind judge) | 0 | 9 |
+| runs that changed code | 0 | 1 |
+| noise comments removed | 61/78 (78%) | 44/78 (56%) |
+| comments worth keeping deleted | 2/450 | 0/450 |
+| stale comments fixed | 24/27 | 26/27 |
+| tokens per run | ~204k | ~172k |
+
+The plain prompt deletes nothing worth keeping, but it rewrites and adds six
+times as many comments, and some of those rewrites turn a true comment into a
+wrong one. comment-tune changes far less and makes nothing up.
+
+**Current version**, 3 runs per case:
+
+| | 14 real files, 7 languages | 7 seeded cases |
+|---|---|---|
+| comments worth keeping deleted | 0/522 | 0/69 |
+| kept word for word (the rest rewritten in place) | 507/522 | 69/69 |
+| noise comments removed | 80/90 | 63/63 |
+| stale comments fixed | 26/27 | 17/18 |
+| expected context comments added | | 42/42 |
+| comment added where none belongs | | 0/21 |
+| runs that changed code | 0 | 0 |
+
+Read these with their limits. The labels were drafted with Claude against the
+criteria, and the blind judge is also Claude, so both share the model's habits.
+The real-code sample is small, and well-kept open-source code has less noise
+than most codebases. Borderline comments still get different verdicts from run
+to run.
+
+## Safety
+
+- **Edits comments only.** Before applying, the skill snapshots each file's
+  comment-free code with `comment_guard.py`; afterwards it verifies the code is
+  identical and redoes any file where it is not.
+- **Asks first.** It reports every verdict and waits for approval unless you
+  pass `--apply`. `comment-tune-audit` never edits.
+- **No network, nothing installed.** The session-start hook prints one bundled
+  JSON file with `cat`. `comment_guard.py` uses the Python standard library only
+  and writes its snapshot inside `.git/` (or the temp directory outside a repo).
+
+## Languages
+
+The skill reads any language. The code-unchanged check knows:
+
+- **Python** through the standard `tokenize` module, docstrings included.
+- **PHP** with its own lexer: `#` and `//` comments, `#[...]` attributes,
+  heredoc and nowdoc, and inline HTML around `<?php ... ?>`.
+- **`//` and `/* */` languages**: Java, Kotlin, Scala, Groovy, Dart, JavaScript,
+  TypeScript, Go, C, C++, Objective-C, C#, Swift, Rust, CSS, SCSS, Less.
+- **`#` languages**: shell, Ruby, Perl, R, YAML, TOML, properties.
+
+A file that uses syntax the check doesn't model, such as a regex literal with
+`//` in it, a raw string, a heredoc or a YAML block scalar, is reported as
+`unchecked` instead of passed, and the skill checks that file's diff by hand.
 
 ## Layout
 
@@ -49,7 +124,7 @@ Without the plugin, copy `AGENTS.md` into your project, or its content into a
 rules/            single source: core rules, skill bodies, references
 scripts/build.py  generates skills/, AGENTS.md, hooks/session-start.json
 tools/            comment_guard.py: proves an edit changed comments only
-evals/            seeded cases in six languages, clean-file controls, a runner
+evals/            eval cases, the runner, and a blind judge
 tests/            lexer tests
 ```
 
@@ -74,11 +149,18 @@ spots (clean code, numbers with no known reason), code changes (must be 0),
 tokens. Agent runs take minutes and real tokens each; run them in a sandbox.
 
 Cases come in two sets. The seeded cases are written to cover every criteria
-tag. The `oss-*` cases are unmodified files from permissive open-source
-projects (source commit and license in each folder) and measure how often
-real comments worth keeping get deleted. Their labels are drafts: review each
-case's `labels.md` before trusting a score. Pick a set with `--case 'oss-*'`.
+tag, in six languages. The `oss-*` cases measure how often real comments worth
+keeping get deleted. Pick a set with `--case 'oss-*'`.
+
+### Third-party code in the eval cases
+
+The `oss-*` cases hold unmodified source files from cenkalti/backoff,
+dart-lang/http, guzzle/guzzle, guzzle/psr7, jhy/jsoup, michaelbull/kotlin-result,
+pallets/itsdangerous, sindresorhus/ky and square/javapoet, under their own
+MIT, BSD-3-Clause, ISC or Apache-2.0 licenses. Each case folder carries the
+project's `LICENSE` and records the source commit and path in `case.json`. These
+files are test data only; the plugin itself doesn't use them.
 
 ## License
 
-MIT
+MIT for this project. The third-party files above keep their own licenses.
