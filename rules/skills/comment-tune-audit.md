@@ -60,7 +60,7 @@ Likely missing context
 Stale comments
  - src/order/OrderService.java:88     says "returns null", returns Optional
 
-Next: {{invoke}}comment-tune src/billing lib/data
+Next: /comment-tune src/billing lib/data
 ```
 
 - Up to 10 worst files, ranked by noise + stale, then missing context.

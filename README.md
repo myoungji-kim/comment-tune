@@ -2,7 +2,7 @@
 
 Cut the noise. Keep the context.
 
-A Claude Code & Codex plugin that tunes code comments: trim the noise, fill in
+A Claude Code plugin that tunes code comments: trim the noise, fill in
 missing context, fix stale ones. It never changes code.
 
 ## What you get
@@ -25,40 +25,29 @@ missing context, fix stale ones. It never changes code.
 
 ## Install
 
-Claude Code:
-
 ```
 /plugin marketplace add myoungji-kim/comment-tune
 /plugin install comment-tune@comment-tune
 ```
 
-Codex:
-
-```
-codex plugin marketplace add myoungji-kim/comment-tune
-codex plugin add comment-tune@comment-tune
-```
-
-Then open `/hooks` in Codex and trust the session-start hook.
-
-Without the plugin, copy `AGENTS.md` into your project (or `~/.codex/AGENTS.md`,
-or a `CLAUDE.md`) for the core rules alone.
+Without the plugin, copy `AGENTS.md` into your project, or its content into a
+`CLAUDE.md`, for the core rules alone.
 
 ## Usage
 
-| | Claude Code | Codex |
-|---|---|---|
-| tune the current diff | `/comment-tune` | `$comment-tune` |
-| tune paths | `/comment-tune src/order` | `$comment-tune src/order` |
-| narrow the scope | `--trim-only`, `--fill-only`, `--fix-only` | same |
-| apply without asking | `--apply` | same |
-| audit a repo | `/comment-tune-audit` | `$comment-tune-audit` |
+| | command |
+|---|---|
+| tune the current diff | `/comment-tune` |
+| tune paths | `/comment-tune src/order` |
+| narrow the scope | `--trim-only`, `--fill-only`, `--fix-only` |
+| apply without asking | `--apply` |
+| audit a repo | `/comment-tune-audit` |
 
 ## Layout
 
 ```
 rules/            single source: core rules, skill bodies, references
-scripts/build.py  generates skills/, codex/skills/, AGENTS.md, hooks/session-start.json
+scripts/build.py  generates skills/, AGENTS.md, hooks/session-start.json
 tools/            comment_guard.py: proves an edit changed comments only
 evals/            seeded cases in six languages, clean-file controls, a runner
 tests/            lexer tests

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Generate every platform file from the single source in rules/.
+"""Generate the plugin files from the single source in rules/.
 
     python3 scripts/build.py          write generated files
     python3 scripts/build.py --check  exit 1 if any generated file is stale
 
 rules/core.md               -> AGENTS.md, hooks/session-start.json
-rules/skills/*.md           -> skills/<name>/SKILL.md        (Claude Code, /name)
-                            -> codex/skills/<name>/SKILL.md  (Codex, $name)
+rules/skills/*.md           -> skills/<name>/SKILL.md
 rules/references/*.md       -> <skill>/references/ (only the ones a skill reads)
 tools/comment_guard.py      -> <skill>/scripts/   (comment-tune only)
 """
@@ -29,7 +28,6 @@ SKILLS = {
         "scripts": [],
     },
 }
-PLATFORMS = {"skills": "/", "codex/skills": "$"}
 
 
 def outputs():
@@ -48,20 +46,18 @@ def outputs():
             }
         }, indent=2) + "\n").encode(),
     }
-    for base, invoke in PLATFORMS.items():
-        for name, spec in SKILLS.items():
-            body = (RULES / "skills" / f"{name}.md").read_text(encoding="utf-8")
-            out[f"{base}/{name}/SKILL.md"] = body.replace("{{invoke}}", invoke).encode()
-            for ref in spec["references"]:
-                out[f"{base}/{name}/references/{ref}"] = (RULES / "references" / ref).read_bytes()
-            for script in spec["scripts"]:
-                src = ROOT / script
-                out[f"{base}/{name}/scripts/{src.name}"] = src.read_bytes()
+    for name, spec in SKILLS.items():
+        out[f"skills/{name}/SKILL.md"] = (RULES / "skills" / f"{name}.md").read_bytes()
+        for ref in spec["references"]:
+            out[f"skills/{name}/references/{ref}"] = (RULES / "references" / ref).read_bytes()
+        for script in spec["scripts"]:
+            src = ROOT / script
+            out[f"skills/{name}/scripts/{src.name}"] = src.read_bytes()
     return out
 
 
 def generated_dirs():
-    return [ROOT / base / name for base in PLATFORMS for name in SKILLS]
+    return [ROOT / "skills" / name for name in SKILLS]
 
 
 def main(argv):

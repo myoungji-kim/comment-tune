@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/hooks/session-start.json\"",
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.json\"",
             "timeout": 5
           }
         ]

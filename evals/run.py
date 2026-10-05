@@ -55,7 +55,7 @@ BASELINE_PROMPT = (
     "missing, and fix comments that no longer match the code. Change comments "
     "only, never code. Apply the changes directly without asking."
 )
-SKILL_PROMPT = {"claude": "/comment-tune {file} --apply", "codex": "$comment-tune {file} --apply"}
+SKILL_PROMPT = "/comment-tune {file} --apply"
 GROUPS = ("noise", "context", "stale", "expect_comment", "forbid_comment")
 
 
@@ -274,7 +274,7 @@ def workspace(case):
 
 
 def run_claude(ws, case, arm, model):
-    prompt = (SKILL_PROMPT["claude"] if arm == "skill" else BASELINE_PROMPT).format(file=case["file"])
+    prompt = (SKILL_PROMPT if arm == "skill" else BASELINE_PROMPT).format(file=case["file"])
     # User settings would load the user's own plugins and hooks into both arms.
     cmd = ["claude", "-p", prompt, "--output-format", "json", "--setting-sources", "project",
            "--no-session-persistence",
@@ -295,33 +295,6 @@ def run_claude(ws, case, arm, model):
     return tokens, result.get("result")
 
 
-def run_codex(ws, case, arm, model):
-    if arm == "skill":
-        shutil.copytree(ROOT / "codex" / "skills", ws / ".agents" / "skills")
-        # Keep the copied skill out of the diff the skill would otherwise judge.
-        (ws / ".git" / "info" / "exclude").write_text(".agents/\n")
-    prompt = (SKILL_PROMPT["codex"] if arm == "skill" else BASELINE_PROMPT).format(file=case["file"])
-    cmd = ["codex", "exec", "--json", "--full-auto", prompt]
-    if model:
-        cmd[2:2] = ["--model", model]
-    proc = subprocess.run(cmd, cwd=ws, capture_output=True, text=True, encoding="utf-8", timeout=900)
-    tokens, report = 0, None
-    for line in proc.stdout.splitlines():
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(event, dict):
-            continue
-        usage = event.get("usage")
-        if usage:
-            tokens += usage.get("input_tokens", 0) + usage.get("output_tokens", 0)
-        item = event.get("item") or {}
-        if item.get("type") == "agent_message":
-            report = item.get("text")
-    return tokens or None, report
-
-
 def summarize(rows):
     metrics = [k for k, v in rows[0].items() if isinstance(v, list)] if rows else []
     total = {k: [sum(r[k][0] for r in rows), sum(r[k][1] for r in rows)] for k in metrics}
@@ -333,7 +306,6 @@ def summarize(rows):
 
 
 def run_agent(args, names):
-    runner = {"claude": run_claude, "codex": run_codex}[args.agent]
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     run_dir = RESULTS / f"{stamp}-{args.agent}-{args.arm}"
     rows = []
@@ -341,7 +313,7 @@ def run_agent(args, names):
         case = load_case(name)
         for i in range(args.runs):
             ws = workspace(case)
-            tokens, report = runner(ws, case, args.arm, args.model)
+            tokens, report = run_claude(ws, case, args.arm, args.model)
             # Keep the output so a later scorer can rescore it without another agent run.
             saved = run_dir / f"{name}-{i + 1}" / case["file"]
             saved.parent.mkdir(parents=True)
@@ -386,7 +358,7 @@ def rescore(path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--selftest", action="store_true")
-    ap.add_argument("--agent", choices=["claude", "codex"])
+    ap.add_argument("--agent", choices=["claude"])
     ap.add_argument("--arm", choices=["skill", "baseline"], default="skill")
     ap.add_argument("--runs", type=int, default=1)
     ap.add_argument("--case", action="append",
