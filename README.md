@@ -85,6 +85,12 @@ wrong one. comment-tune changes far less and makes nothing up.
 | comment added where none belongs | | 0/21 |
 | runs that changed code | 0 | 0 |
 
+Read these with their limits. The labels were drafted with Claude against the
+criteria, and the blind judge is also Claude, so both share the model's habits.
+The real-code sample is small, and well-kept open-source code has less noise
+than most codebases. Borderline comments still get different verdicts from run
+to run.
+
 ### Cost
 
 - **Always on:** the core rules add about 460 tokens to each session.
@@ -94,12 +100,6 @@ wrong one. comment-tune changes far less and makes nothing up.
   did (16–19 turns). The plain prompt cost $0.19–0.37 on the same four files;
   the averages were $0.27 for both. About 85% of the tokens are cache reads,
   billed at a tenth of fresh input, so raw token counts overstate the cost.
-
-Read these with their limits. The labels were drafted with Claude against the
-criteria, and the blind judge is also Claude, so both share the model's habits.
-The real-code sample is small, and well-kept open-source code has less noise
-than most codebases. Borderline comments still get different verdicts from run
-to run.
 
 ## Safety
 
