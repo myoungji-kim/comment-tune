@@ -17,16 +17,16 @@
       "tag": "restates"
     },
     {
-      "text": "Prepare the buffer for reading",
-      "tag": "restates"
-    },
-    {
       "text": "update remaining to reflect the difference in the new maxsize",
       "tag": "restates"
     },
     {
       "text": "calculate percent complete if contentLength > 0",
       "tag": "restates"
+    },
+    {
+      "text": "reimplemented from ConstrainableInputStream",
+      "tag": "history"
     }
   ],
   "context": [
@@ -97,6 +97,10 @@
     {
       "text": "this, not buff, so that return is constrained",
       "tag": "trap"
+    },
+    {
+      "text": "Prepare the buffer for reading",
+      "tag": "clarification"
     }
   ],
   "stale": [

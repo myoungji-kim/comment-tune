@@ -3,10 +3,6 @@
   "commit_message": "Add SyncRepository\n\nWrites are spaced 800 ms apart: the sync API answers 429 Too Many\nRequests to writes from the same device less than 800 ms apart.",
   "noise": [
     {
-      "text": "Constructor for SyncRepository.",
-      "tag": "restates"
-    },
-    {
       "text": "Previously this used package:http directly",
       "tag": "history"
     },
@@ -43,6 +39,10 @@
     {
       "text": "The API sends updatedAt in seconds, not milliseconds.",
       "tag": "constraint"
+    },
+    {
+      "text": "Constructor for SyncRepository.",
+      "tag": "api-contract"
     }
   ],
   "stale": [

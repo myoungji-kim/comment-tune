@@ -47,6 +47,18 @@
     {
       "text": "Wait for the next backoff period or context cancellation.",
       "tag": "restates"
+    },
+    {
+      "text": "retryOptions holds configuration settings",
+      "tag": "restates"
+    },
+    {
+      "text": "withTimer sets a custom timer for managing delays",
+      "tag": "restates"
+    },
+    {
+      "text": "Stop retrying if maximum elapsed time exceeded.",
+      "tag": "restates"
     }
   ],
   "context": [

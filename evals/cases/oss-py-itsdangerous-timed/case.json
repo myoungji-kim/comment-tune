@@ -11,6 +11,10 @@
     {
       "text": "Check timestamp is not older than max_age",
       "tag": "restates"
+    },
+    {
+      "text": "If there is no timestamp in the result there is something",
+      "tag": "verbose"
     }
   ],
   "context": [
@@ -57,7 +61,24 @@
     {
       "text": "expired. Do not try the next signer",
       "tag": "rationale"
+    },
+    {
+      "text": "Signs the given string and also attaches time information.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Only validates the given signed value.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Uses :class:`TimestampSigner` instead of the default",
+      "tag": "api-contract"
     }
   ],
-  "stale": []
+  "stale": [
+    {
+      "text": "All arguments are forwarded to the signer's",
+      "tag": "stale"
+    }
+  ]
 }

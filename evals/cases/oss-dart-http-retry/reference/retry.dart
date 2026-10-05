@@ -15,10 +15,8 @@ import 'http.dart';
 /// resending it. This can cause a lot of memory usage when sending a large
 /// [StreamedRequest].
 final class RetryClient extends BaseClient {
-  /// The wrapped client.
   final Client _inner;
 
-  /// The number of times a request should be retried.
   final int _retries;
 
   /// The callback that determines whether a request should be retried.
@@ -147,7 +145,6 @@ final class RetryClient extends BaseClient {
     }
   }
 
-  /// Returns a copy of [original] with the given [body].
   StreamedRequest _copyRequest(BaseRequest original, Stream<List<int>> body) {
     final StreamedRequest request;
     if (original case Abortable(:final abortTrigger?)) {

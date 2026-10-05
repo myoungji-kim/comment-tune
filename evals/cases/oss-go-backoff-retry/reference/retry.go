@@ -20,7 +20,6 @@ type Operation[T any] func() (T, error)
 // error, an exhausted limit, or a cancelled context).
 type Notify func(error, time.Duration)
 
-// retryOptions holds configuration settings for the retry mechanism.
 type retryOptions struct {
 	BackOff        BackOff       // Strategy for calculating backoff periods.
 	Timer          timer         // Timer to manage retry delays.
@@ -44,7 +43,6 @@ func WithBackOff(b BackOff) RetryOption {
 	}
 }
 
-// withTimer sets a custom timer for managing delays between retries.
 func withTimer(t timer) RetryOption {
 	return func(args *retryOptions) {
 		args.Timer = t
@@ -172,7 +170,6 @@ func Retry[T any](ctx context.Context, operation Operation[T], opts ...RetryOpti
 			next = 0
 		}
 
-		// Stop retrying if maximum elapsed time exceeded.
 		if args.MaxElapsedTime > 0 && next > args.MaxElapsedTime-time.Since(startedAt) {
 			return res, &RetryError{LastErr: lastErr, Cause: ErrMaxElapsedTime}
 		}

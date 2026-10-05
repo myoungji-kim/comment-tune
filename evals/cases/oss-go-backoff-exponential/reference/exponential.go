@@ -90,7 +90,6 @@ func (b *ExponentialBackOff) NextBackOff() time.Duration {
 	return next
 }
 
-// Increments the current interval by multiplying it with the multiplier.
 func (b *ExponentialBackOff) incrementCurrentInterval() {
 	// Check for overflow, if overflow is detected set the current interval to the max interval.
 	if float64(b.currentInterval) >= float64(b.MaxInterval)/b.Multiplier {
@@ -100,9 +99,6 @@ func (b *ExponentialBackOff) incrementCurrentInterval() {
 	}
 }
 
-// Returns a random value from the following interval:
-//
-//	[currentInterval - randomizationFactor * currentInterval, currentInterval + randomizationFactor * currentInterval].
 func getRandomValueFromInterval(randomizationFactor, random float64, currentInterval time.Duration) time.Duration {
 	if randomizationFactor == 0 {
 		return currentInterval

@@ -48,6 +48,42 @@
     {
       "text": "Key derivation is not intended to be used as a security method",
       "tag": "api-contract"
+    },
+    {
+      "text": "Returns the signature for the given key and value.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Verifies the given signature matches the expected signature.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Provides an algorithm that does not perform any signing",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Provides signature generation using HMACs.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Returns the signature for the given value.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Signs the given string.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Verifies the signature for the given value.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Unsigns the given string.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Only validates the given signed value.",
+      "tag": "api-contract"
     }
   ],
   "stale": []

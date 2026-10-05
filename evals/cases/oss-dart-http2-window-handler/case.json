@@ -60,6 +60,10 @@
     {
       "text": "This can be optimized by delaying the window update",
       "tag": "todo-with-reason"
+    },
+    {
+      "text": "If this turns negative, it means the remote end send us more data",
+      "tag": "trap"
     }
   ],
   "stale": [

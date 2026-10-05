@@ -1,6 +1,7 @@
 import { NotFoundError, RateLimitedError } from './errors';
 
 export interface ClientOptions {
+  /** The base URL. */
   baseUrl: string;
   token: string;
   // Default timeout: 10s
@@ -13,6 +14,7 @@ export class GitHubClient {
   constructor(private readonly options: ClientOptions) {}
 
   /**
+   * Sends a GET request.
    * @returns the parsed JSON body.
    * @throws NotFoundError on 404.
    */

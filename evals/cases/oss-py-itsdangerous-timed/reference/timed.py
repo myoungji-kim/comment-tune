@@ -94,11 +94,8 @@ class TimestampSigner(Signer):
 
         sep = want_bytes(self.sep)
 
-        # If there is no timestamp in the result there is something
-        # seriously wrong. In case there was a signature error, we raise
-        # that one directly, otherwise we have a weird situation in
-        # which we shouldn't have come except someone uses a time-based
-        # serializer on non-timestamp data, so catch that.
+        # A signature error wins; without one, a missing timestamp means a
+        # time-based serializer was used on data that has no timestamp.
         if sep not in result:
             if sig_error:
                 raise sig_error
@@ -192,8 +189,8 @@ class TimedSerializer(Serializer[_TSerialized]):
         signature validation fails. If a ``max_age`` is provided it will
         ensure the signature is not older than that time in seconds. In
         case the signature is outdated, :exc:`.SignatureExpired` is
-        raised. All arguments are forwarded to the signer's
-        :meth:`~TimestampSigner.unsign` method.
+        raised. ``salt`` picks the signers to try; ``max_age`` goes to
+        each signer's :meth:`~TimestampSigner.unsign`.
         """
         s = want_bytes(s)
         last_exception = None

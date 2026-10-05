@@ -157,8 +157,7 @@ final class CachingStream implements StreamInterface
     {
         // When appending to the end of the currently read stream, you'll want
         // to skip bytes from being read from the remote stream to emulate
-        // other stream wrappers. Basically replacing bytes of data of a fixed
-        // length.
+        // other stream wrappers.
         $overflow = Integers::add(strlen($string), $this->tell()) - $this->remoteStream->tell();
         if ($overflow > 0) {
             $this->skipReadBytes = Integers::add($this->skipReadBytes, $overflow);

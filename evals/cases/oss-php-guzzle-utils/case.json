@@ -64,6 +64,10 @@
     {
       "text": "@throws InvalidArgumentException",
       "tag": "untouchable"
+    },
+    {
+      "text": "Get the default User-Agent string to use with Guzzle.",
+      "tag": "api-contract"
     }
   ],
   "stale": []

@@ -81,7 +81,7 @@ def criteria_tags():
             found.setdefault(section, []).append(m[1])
     return {
         "noise": found["trim"],
-        "context": found["fill"] + ["untouchable", "todo-with-reason"],
+        "context": found["fill"] + ["untouchable", "todo-with-reason", "clarification"],
         "stale": found["fix"],
         "expect_comment": found["fill"],
         "forbid_comment": ["no-evidence", "plain"],

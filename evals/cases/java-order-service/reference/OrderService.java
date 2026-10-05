@@ -32,6 +32,9 @@ public class OrderService {
         this.inventoryClient = inventoryClient;
     }
 
+    /**
+     * Gets the order by id.
+     */
     public Optional<Order> findOrder(long id) {
         return orderRepository.findById(id);
     }

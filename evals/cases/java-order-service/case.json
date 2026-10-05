@@ -11,10 +11,6 @@
       "tag": "restates"
     },
     {
-      "text": "Gets the order by id.",
-      "tag": "restates"
-    },
-    {
       "text": "Updated to use the new PaymentGateway as requested in review",
       "tag": "narration"
     },
@@ -51,6 +47,10 @@
     {
       "text": "Stripe rejects statement descriptors longer than 22 characters.",
       "tag": "constraint"
+    },
+    {
+      "text": "Gets the order by id.",
+      "tag": "api-contract"
     }
   ],
   "stale": [

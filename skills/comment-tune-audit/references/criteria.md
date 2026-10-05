@@ -22,7 +22,7 @@ Then look at the code in scope for **fill** spots that have no comment.
 
 | tag | what it looks like |
 |---|---|
-| `restates` | Says what the next line says. `// increment count`, `/** Gets the user. */` on `getUser()` |
+| `restates` | Says what the next line says. `// increment count`, `/** Gets the user. */` on a private `getUser()` |
 | `narration` | Describes the edit, not the code. "added", "updated", "now uses", "new", "as requested", "per review", "fixed bug where" |
 | `history` | The author's reason for a change, or what the code used to do. "we switched from X because", "previously", "used to", "the old version" |
 | `verbose` | One useful point buried in lines that restate the code or repeat themselves. Rewrite to that point, one line. Not verbose when each line adds its own fact: a reason, an example, an edge case, a link |
@@ -35,6 +35,9 @@ to the commit message draft instead of dropping it.
 
 A TODO that says what to do *and* why or when (`TODO(#123): drop once the
 v1 API is retired`) is a keep.
+
+Not `restates`: a comment that says what an unclear call into a library you
+can't change does (`buf.flip(); // switch to read mode`). Keep it.
 
 ## fill — add what is missing
 
@@ -81,8 +84,9 @@ Never remove or rewrite:
 - Generated files: headers like `GENERATED CODE - DO NOT MODIFY`, `@generated`,
   and files such as `*.g.dart`, `*.freezed.dart`, `*.pb.*`, `*_pb2.py`,
   build output and vendored code.
-- Doc comments a doc tool or API consumer depends on, unless they are stale
-  (fix, don't remove).
+- Doc comments on public API, which IDEs and doc tools show to callers, even
+  when they only restate the name; fix them if stale, never remove them. On
+  non-public code a doc comment that only restates the name is `restates`.
 - Comments the user explicitly asked for.
 
 ## Rewrites

@@ -11,6 +11,14 @@
     {
       "text": "make sure no randomness is used when randomizationFactor is 0",
       "tag": "restates"
+    },
+    {
+      "text": "Increments the current interval by multiplying",
+      "tag": "restates"
+    },
+    {
+      "text": "Returns a random value from the following interval",
+      "tag": "restates"
     }
   ],
   "context": [

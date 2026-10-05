@@ -17,7 +17,7 @@ import static org.jsoup.internal.SharedConstants.DefaultBufferSize;
  * A jsoup internal class (so don't use it as there is no contract API) that enables controls on a buffered input stream,
  * namely a maximum read size, and the ability to Thread.interrupt() the read.
  */
-// reimplemented from ConstrainableInputStream for JDK21 - extending BufferedInputStream will pin threads during read
+// Not a BufferedInputStream subclass: on JDK21, extending BufferedInputStream will pin threads during read
 public class ControllableInputStream extends FilterInputStream {
     private final SimpleBufferedInput buff; // super.in, but typed as SimpleBufferedInput
     private int maxSize;                    // logical cap exposed to callers (0 == unlimited)
@@ -177,7 +177,7 @@ public class ControllableInputStream extends FilterInputStream {
                     if (remaining <= 0) break;
                 }
             }
-            outBuf.flip();
+            outBuf.flip(); // Prepare the buffer for reading
             return outBuf;
         } finally {
             SimpleBufferedInput.BufferPool.release(readBuf);

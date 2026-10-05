@@ -6,6 +6,7 @@ import 'item.dart';
 import 'offline_exception.dart';
 
 class SyncRepository {
+  /// Constructor for SyncRepository.
   SyncRepository(this._dio);
 
   final Dio _dio;

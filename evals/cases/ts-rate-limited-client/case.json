@@ -7,14 +7,6 @@
       "tag": "banner"
     },
     {
-      "text": "The base URL.",
-      "tag": "restates"
-    },
-    {
-      "text": "Sends a GET request.",
-      "tag": "restates"
-    },
-    {
       "text": "Now uses fetch instead of axios",
       "tag": "narration"
     },
@@ -47,6 +39,14 @@
     {
       "text": "GitHub sends the reset time in epoch seconds.",
       "tag": "constraint"
+    },
+    {
+      "text": "The base URL.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Sends a GET request.",
+      "tag": "api-contract"
     }
   ],
   "stale": [
