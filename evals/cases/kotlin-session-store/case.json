@@ -17,6 +17,7 @@
     {
       "kind": "fill",
       "anchor": "prefs.edit()",
+      "lines": 4,
       "any": ["apply", "killed", "lose", "lost"],
       "tag": "rationale"
     },

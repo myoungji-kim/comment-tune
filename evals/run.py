@@ -119,19 +119,19 @@ def score(case, out_path, in_path=None):
 
     added = [(ln, ln + t.count("\n"), norm(t)) for ln, t in comments if norm(t) not in before]
 
-    def anchor_line(item):
-        return next((i + 1 for i, l in enumerate(lines) if item["anchor"] in l), None)
+    def window(item):
+        """Lines a comment for this item may end on: above the anchor, or inside its statement."""
+        anchor = next((i + 1 for i, l in enumerate(lines) if item["anchor"] in l), None)
+        return None if anchor is None else range(anchor - NEAR, anchor + item.get("lines", 1))
 
     def has_comment(exp):
-        anchor = anchor_line(exp)
-        if anchor is None:
-            return False
-        return any(anchor - NEAR <= end <= anchor and any(k.lower() in t for k in exp["any"])
-                   for _, end, t in spans)
+        lines_ok = window(exp)
+        return bool(lines_ok) and any(end in lines_ok and any(k.lower() in t for k in exp["any"])
+                                      for _, end, t in spans)
 
     def left_alone(item):
-        anchor = anchor_line(item)
-        return anchor is not None and not any(anchor - NEAR <= end <= anchor for _, end, _ in added)
+        lines_ok = window(item)
+        return bool(lines_ok) and not any(end in lines_ok for _, end, _ in added)
 
     return {
         "noise_removed": [sum(not present(n) for n in case["noise"]), len(case["noise"])],
