@@ -75,6 +75,7 @@ python3 evals/run.py --coverage                       # case items per tag; flag
 python3 evals/run.py --agent claude --arm skill       # real headless runs
 python3 evals/run.py --agent claude --arm baseline    # same agent, no plugin
 python3 evals/run.py --rescore evals/results/RUN.json # rescore saved outputs
+python3 evals/judge.py evals/results/A.json B.json   # blind judge of rewrites and additions
 ```
 
 Metrics: noise removed, context comments kept verbatim and not deleted (the

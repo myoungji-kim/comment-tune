@@ -106,18 +106,23 @@ def read_comments(path):
     return src, comments
 
 
+def code_lines(path, src):
+    """Line numbers that hold code, in order."""
+    lines = src.splitlines()
+    comment_only = set()
+    for ln, text in comment_guard.split(str(path), src)[1]:
+        trailing = lines[ln - 1].split(text.split("\n", 1)[0], 1)[0].strip() != ""
+        comment_only.update(range(ln + trailing, ln + text.count("\n") + 1))
+    return [i + 1 for i, l in enumerate(lines) if l.strip() and i + 1 not in comment_only]
+
+
 def owners(path, src, comments):
     """For each comment, the index of the code line it belongs to: the line it trails, or the next one.
 
     Code is identical before and after a comment-only edit, so the same index
     names the same spot in both versions of a file.
     """
-    lines = src.splitlines()
-    comment_only = set()
-    for ln, text in comment_guard.split(str(path), src)[1]:
-        trailing = lines[ln - 1].split(text.split("\n", 1)[0], 1)[0].strip() != ""
-        comment_only.update(range(ln + trailing, ln + text.count("\n") + 1))
-    code = [i + 1 for i, l in enumerate(lines) if l.strip() and i + 1 not in comment_only]
+    code = code_lines(path, src)
     index = {n: k for k, n in enumerate(code)}
     return [index[ln] if ln in index
             else next((index[n] for n in code if n > ln + t.count("\n")), len(code))
