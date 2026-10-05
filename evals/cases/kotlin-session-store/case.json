@@ -1,0 +1,52 @@
+{
+  "file": "SessionStore.kt",
+  "commit_message": "Add SessionStore\n\nsave() uses commit(), not apply(): the process is often killed right\nafter login, and apply() loses the write when that happens.\n\nfindUser returns null for deleted accounts.\n\nDevice tags are uppercased with Locale.ROOT: under a Turkish locale \"i\"\nbecomes \"İ\" and the server rejects the tag.",
+  "noise": [
+    {
+      "text": "So basically what happens here is that the token",
+      "tag": "verbose"
+    }
+  ],
+  "context": [
+    {
+      "text": "Null when the token is malformed; never throws.",
+      "tag": "api-contract"
+    }
+  ],
+  "expect_comment": [
+    {
+      "kind": "fill",
+      "anchor": "prefs.edit()",
+      "any": ["apply", "killed", "lose", "lost"],
+      "tag": "rationale"
+    },
+    {
+      "kind": "rewrite",
+      "anchor": "fun isExpired(",
+      "any": ["clock", "drift", "skew"],
+      "tag": "constraint"
+    },
+    {
+      "kind": "fill",
+      "anchor": "fun findUser(",
+      "any": ["deleted"],
+      "tag": "api-contract"
+    },
+    {
+      "kind": "fill",
+      "anchor": "model.uppercase(Locale.ROOT)",
+      "any": ["turkish", "İ", "dotted"],
+      "tag": "constraint"
+    }
+  ],
+  "forbid_comment": [
+    {
+      "anchor": "fun displayName(",
+      "tag": "plain"
+    },
+    {
+      "anchor": "retry(times = 7)",
+      "tag": "no-evidence"
+    }
+  ]
+}

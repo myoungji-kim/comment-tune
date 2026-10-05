@@ -1,0 +1,56 @@
+{
+  "file": "runner.py",
+  "commit_message": "Add job runner\n\nThe SIGTERM handler is installed before fork(): children inherit signal\nhandlers at fork time, and a child forked first dies on SIGTERM without\nflushing its queue.\n\nclaim() returns False when another worker already holds the job.\n\nreconnect() waits 50 ms after closing: the broker acks on a 50 ms timer\nand a reconnect inside that window gets the old session.",
+  "noise": [
+    {
+      "text": "This part is a little tricky.",
+      "tag": "verbose"
+    }
+  ],
+  "context": [
+    {
+      "text": "requests drops pooled connections after a reset; retry once on a fresh session.",
+      "tag": "workaround"
+    },
+    {
+      "text": "TODO(#518): remove upgrade_v1 once the last v1 producer is retired.",
+      "tag": "todo-with-reason"
+    }
+  ],
+  "expect_comment": [
+    {
+      "kind": "fill",
+      "anchor": "signal.signal(signal.SIGTERM",
+      "any": ["fork", "inherit"],
+      "tag": "trap"
+    },
+    {
+      "kind": "fill",
+      "anchor": "resp = self._post(f\"/jobs/{job_id}/claim\")",
+      "any": ["another worker", "already"],
+      "tag": "api-contract"
+    },
+    {
+      "kind": "rewrite",
+      "anchor": "if len(payload) > MAX_PAYLOAD:",
+      "any": ["drop", "silent"],
+      "tag": "magic-number"
+    },
+    {
+      "kind": "fill",
+      "anchor": "time.sleep(0.05)",
+      "any": ["ack", "old session"],
+      "tag": "workaround"
+    }
+  ],
+  "forbid_comment": [
+    {
+      "anchor": "POLL_SECONDS = 3.7",
+      "tag": "no-evidence"
+    },
+    {
+      "anchor": "def size(self)",
+      "tag": "plain"
+    }
+  ]
+}

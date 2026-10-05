@@ -60,7 +60,7 @@ or a `CLAUDE.md`) for the core rules alone.
 rules/            single source: core rules, skill bodies, references
 scripts/build.py  generates skills/, codex/skills/, AGENTS.md, hooks/session-start.json
 tools/            comment_guard.py: proves an edit changed comments only
-evals/            seeded Java, Dart and TypeScript cases plus a runner
+evals/            seeded cases in six languages, clean-file controls, a runner
 tests/            lexer tests
 ```
 
@@ -77,7 +77,8 @@ python3 evals/run.py --agent claude --arm baseline    # same agent, no plugin
 ```
 
 Metrics: noise removed, context comments kept (the one that matters most),
-stale comments fixed, expected comments added, code changes (must be 0),
+stale comments fixed, expected comments added, no comments at forbidden
+spots (clean code, numbers with no known reason), code changes (must be 0),
 tokens. Agent runs take minutes and real tokens each; run them in a sandbox.
 
 ## License

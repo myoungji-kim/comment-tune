@@ -1,0 +1,36 @@
+{
+  "file": "checkout.ts",
+  "commit_message": "Add Checkout",
+  "context": [
+    {
+      "text": "Stripe rejects amounts above 99,999,999 in the smallest currency unit.",
+      "tag": "magic-number"
+    },
+    {
+      "text": "Amount in cents. Throws RangeError for negative values.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Safari ignores the first focus() on an input that was just unhidden.",
+      "tag": "workaround"
+    },
+    {
+      "text": "TODO(#412): drop legacyPrice once v1 clients are gone.",
+      "tag": "todo-with-reason"
+    }
+  ],
+  "forbid_comment": [
+    {
+      "anchor": "const MAX_ITEMS = 40;",
+      "tag": "no-evidence"
+    },
+    {
+      "anchor": "get itemCount()",
+      "tag": "plain"
+    },
+    {
+      "anchor": "function lineTotal(",
+      "tag": "plain"
+    }
+  ]
+}

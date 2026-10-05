@@ -1,0 +1,28 @@
+{
+  "file": "router.go",
+  "commit_message": "Add packet router\n\nRoutes live in a slice and are scanned linearly: there are at most eight,\nand a map lookup was slower in the per-packet benchmark.\n\nServe clears the read deadline before each read: the TLS proxy in front\nof the gateway sets one on accepted conns, and idle links would time out.",
+  "context": [
+    {
+      "text": "1500 is the Ethernet MTU; frames on this link never exceed it.",
+      "tag": "magic-number"
+    },
+    {
+      "text": "Drop instead of blocking: a slow handler must not stall the read loop.",
+      "tag": "rationale"
+    }
+  ],
+  "expect_comment": [
+    {
+      "kind": "fill",
+      "anchor": "routes []route",
+      "any": ["linear", "map", "eight", "benchmark"],
+      "tag": "rationale"
+    },
+    {
+      "kind": "fill",
+      "anchor": "if err := conn.SetReadDeadline(time.Time{}); err != nil {",
+      "any": ["proxy", "idle"],
+      "tag": "workaround"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score comment-tune against seeded Java, Dart and TypeScript files.
+"""Score comment-tune against seeded source files in several languages.
 
     python3 evals/run.py --selftest
         Score each case's input (before) and reference (ideal). The reference
@@ -20,7 +20,8 @@
 
 Metrics per case: noise removed, context kept (the one that matters most:
 a tool that deletes the comments worth keeping is worse than none), stale
-comments fixed, expected comments present, code changed (must be no), tokens.
+comments fixed, expected comments present, forbidden spots left without a
+new comment, code changed (must be no), tokens.
 """
 import argparse
 import datetime
@@ -40,7 +41,7 @@ CRITERIA = ROOT / "rules" / "references" / "criteria.md"
 sys.path.insert(0, str(ROOT / "tools"))
 import comment_guard  # noqa: E402
 
-NEAR = 3  # an expected comment must end at most this many lines above its anchor
+NEAR = 3  # a comment counts for an anchor when it ends at most this many lines above it
 MIN_PER_TAG = 2  # one item per tag can't tell a skill from luck
 
 BASELINE_PROMPT = (
@@ -49,6 +50,7 @@ BASELINE_PROMPT = (
     "only, never code. Apply the changes directly without asking."
 )
 SKILL_PROMPT = {"claude": "/comment-tune {file} --apply", "codex": "$comment-tune {file} --apply"}
+GROUPS = ("noise", "context", "stale", "expect_comment", "forbid_comment")
 
 
 def norm(text):
@@ -58,11 +60,13 @@ def norm(text):
 def load_case(name):
     case = json.loads((CASES / name / "case.json").read_text(encoding="utf-8"))
     case["name"] = name
+    for group in GROUPS:
+        case.setdefault(group, [])
     return case
 
 
 def criteria_tags():
-    """Valid tags for each case group, read from the criteria tables."""
+    """Valid tags for each case group: the criteria tables plus control tags."""
     found, section = {}, None
     for line in CRITERIA.read_text(encoding="utf-8").splitlines():
         if line.startswith("## "):
@@ -71,9 +75,10 @@ def criteria_tags():
             found.setdefault(section, []).append(m[1])
     return {
         "noise": found["trim"],
-        "context": found["fill"] + ["untouchable"],
+        "context": found["fill"] + ["untouchable", "todo-with-reason"],
         "stale": found["fix"],
         "expect_comment": found["fill"],
+        "forbid_comment": ["no-evidence", "plain"],
     }
 
 
@@ -83,17 +88,23 @@ def tag_errors(case, valid):
             for i, item in enumerate(case[group]) if item.get("tag") not in tags]
 
 
-def score(case, out_path, in_path=None):
-    in_path = in_path or CASES / case["name"] / "input" / case["file"]
-    src = pathlib.Path(out_path).read_text(encoding="utf-8")
+def read_comments(path):
+    src = pathlib.Path(path).read_text(encoding="utf-8")
     comments = []
-    for ln, text in comment_guard.split(str(out_path), src)[1]:
+    for ln, text in comment_guard.split(str(path), src)[1]:
         # Consecutive line comments read as one comment.
         if comments and comments[-1][0] + comments[-1][1].count("\n") + 1 == ln:
             comments[-1] = (comments[-1][0], comments[-1][1] + "\n" + text)
         else:
             comments.append((ln, text))
+    return src, comments
+
+
+def score(case, out_path, in_path=None):
+    in_path = in_path or CASES / case["name"] / "input" / case["file"]
+    src, comments = read_comments(out_path)
     texts = [norm(t) for _, t in comments]
+    before = {norm(t) for _, t in read_comments(in_path)[1]}
 
     def present(item):
         if "exact" in item:
@@ -106,12 +117,21 @@ def score(case, out_path, in_path=None):
     spans = [(ln, ln + t.count("\n"), norm(t)) for ln, t in comments
              if not any(b in norm(t) for b in bad)]
 
+    added = [(ln, ln + t.count("\n"), norm(t)) for ln, t in comments if norm(t) not in before]
+
+    def anchor_line(item):
+        return next((i + 1 for i, l in enumerate(lines) if item["anchor"] in l), None)
+
     def has_comment(exp):
-        anchor = next((i + 1 for i, l in enumerate(lines) if exp["anchor"] in l), None)
+        anchor = anchor_line(exp)
         if anchor is None:
             return False
         return any(anchor - NEAR <= end <= anchor and any(k.lower() in t for k in exp["any"])
                    for _, end, t in spans)
+
+    def left_alone(item):
+        anchor = anchor_line(item)
+        return anchor is not None and not any(anchor - NEAR <= end <= anchor for _, end, _ in added)
 
     return {
         "noise_removed": [sum(not present(n) for n in case["noise"]), len(case["noise"])],
@@ -119,13 +139,15 @@ def score(case, out_path, in_path=None):
         "stale_fixed": [sum(not present(s) for s in case["stale"]), len(case["stale"])],
         "expected_comments": [sum(has_comment(e) for e in case["expect_comment"]),
                               len(case["expect_comment"])],
+        "forbid_respected": [sum(left_alone(f) for f in case["forbid_comment"]),
+                             len(case["forbid_comment"])],
         "code_changed": comment_guard.fingerprint(str(in_path))
         != comment_guard.fingerprint(str(out_path), src),
     }
 
 
 def fmt(s):
-    cols = [f"{k} {v[0]}/{v[1]}" for k, v in s.items() if isinstance(v, list)]
+    cols = [f"{k} {v[0]}/{v[1]}" for k, v in s.items() if isinstance(v, list) and v[1]]
     cols.append("code CHANGED" if s["code_changed"] else "code unchanged")
     if s.get("tokens") is not None:
         cols.append(f"tokens {s['tokens']:,}")
@@ -142,7 +164,7 @@ def selftest(names):
     for name in names:
         case = load_case(name)
         for err in tag_errors(case, valid):
-            print(f"  FAIL: {name} {err} is not in criteria.md")
+            print(f"  FAIL: {name} {err} is not a known tag")
             ok = False
         before = score(case, CASES / name / "input" / case["file"])
         ideal = score(case, CASES / name / "reference" / case["file"])
@@ -257,8 +279,9 @@ def run_agent(args, names):
                 print(f"  kept: {ws}")
 
     total = {k: [sum(r[k][0] for r in rows), sum(r[k][1] for r in rows)]
-             for k in ("noise_removed", "context_kept", "stale_fixed", "expected_comments")}
-    summary = {k: f"{v[0]}/{v[1]} ({v[0] / v[1]:.0%})" for k, v in total.items()}
+             for k in ("noise_removed", "context_kept", "stale_fixed", "expected_comments",
+                       "forbid_respected")}
+    summary = {k: f"{v[0]}/{v[1]} ({v[0] / v[1]:.0%})" for k, v in total.items() if v[1]}
     summary["runs_with_code_changes"] = sum(r["code_changed"] for r in rows)
     counted = [r["tokens"] for r in rows if r["tokens"]]
     summary["avg_tokens"] = round(sum(counted) / len(counted)) if counted else None
