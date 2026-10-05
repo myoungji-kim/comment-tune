@@ -1,0 +1,70 @@
+{
+  "file": "Utils.php",
+  "commit_message": "Import Utils.php",
+  "source": {
+    "repo": "https://github.com/guzzle/guzzle",
+    "commit": "93939470950a9b11e2e84204166ef5e048c55fe4",
+    "path": "src/Utils.php",
+    "license": "MIT"
+  },
+  "noise": [],
+  "context": [
+    {
+      "text": "Header lines array of strings in the following",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Returns a debug stream based on the provided variable.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "The returned handler is not wrapped by any default middlewares.",
+      "tag": "api-contract"
+    },
+    {
+      "text": "does not apply cURL multi connection caps to",
+      "tag": "constraint"
+    },
+    {
+      "text": "Handler-scoped required sharing can also be satisfied",
+      "tag": "constraint"
+    },
+    {
+      "text": "so a cURL install that cannot",
+      "tag": "rationale"
+    },
+    {
+      "text": "Forwarded to the CurlMultiHandler only: CurlHandler and",
+      "tag": "constraint"
+    },
+    {
+      "text": "Connection caps only govern transfers on the multi handle",
+      "tag": "trap"
+    },
+    {
+      "text": "@return array<string, mixed>",
+      "tag": "untouchable"
+    },
+    {
+      "text": "@return array{max_host_connections?: int, max_total_connections?: int}",
+      "tag": "untouchable"
+    },
+    {
+      "text": "@param (callable(RequestInterface",
+      "tag": "untouchable"
+    },
+    {
+      "text": "@return (callable(RequestInterface",
+      "tag": "untouchable"
+    },
+    {
+      "text": "lowercase header names to the actual",
+      "tag": "api-contract"
+    },
+    {
+      "text": "@throws InvalidArgumentException",
+      "tag": "untouchable"
+    }
+  ],
+  "stale": []
+}

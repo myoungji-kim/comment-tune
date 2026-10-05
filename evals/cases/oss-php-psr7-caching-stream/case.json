@@ -1,0 +1,63 @@
+{
+  "file": "CachingStream.php",
+  "commit_message": "Import CachingStream.php",
+  "source": {
+    "repo": "https://github.com/guzzle/psr7",
+    "commit": "a3059ba1a84c9139c4ae03cf0f45bea276c97c74",
+    "path": "src/CachingStream.php",
+    "license": "MIT"
+  },
+  "noise": [
+    {
+      "text": "Read the remoteStream until we have read in at least the amount",
+      "tag": "restates"
+    },
+    {
+      "text": "Perform a regular read on any previously read data from the buffer",
+      "tag": "restates"
+    },
+    {
+      "text": "More data was requested so read from the remote stream",
+      "tag": "restates"
+    }
+  ],
+  "context": [
+    {
+      "text": "Stream decorator that can cache previously read bytes",
+      "tag": "api-contract"
+    },
+    {
+      "text": "@var StreamInterface Stream being wrapped",
+      "tag": "untouchable"
+    },
+    {
+      "text": "Number of bytes to skip reading due to a write on the buffer",
+      "tag": "untouchable"
+    },
+    {
+      "text": "Lossy or non-seekable streams such as BufferStream",
+      "tag": "api-contract"
+    },
+    {
+      "text": "Discovering the size reads the remote stream to EOF",
+      "tag": "trap"
+    },
+    {
+      "text": "This mimics the behavior of other PHP stream wrappers.",
+      "tag": "rationale"
+    },
+    {
+      "text": "A short cache write would silently corrupt later replays",
+      "tag": "rationale"
+    },
+    {
+      "text": "to skip bytes from being read from the remote stream to emulate",
+      "tag": "rationale"
+    },
+    {
+      "text": "Close the remote stream and any attached cache stream.",
+      "tag": "api-contract"
+    }
+  ],
+  "stale": []
+}
