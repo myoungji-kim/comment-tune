@@ -2,24 +2,58 @@
   "file": "sync_repository.dart",
   "commit_message": "Add SyncRepository\n\nWrites are spaced 800 ms apart: the sync API answers 429 Too Many\nRequests to writes from the same device less than 800 ms apart.",
   "noise": [
-    "Constructor for SyncRepository.",
-    "Previously this used package:http directly",
-    "Added caching as requested",
-    "Fetch the items from the API",
-    "print('fetched",
-    "---------------- Private helpers",
     {
-      "exact": "// FIXME"
+      "text": "Constructor for SyncRepository.",
+      "tag": "restates"
+    },
+    {
+      "text": "Previously this used package:http directly",
+      "tag": "history"
+    },
+    {
+      "text": "Added caching as requested",
+      "tag": "narration"
+    },
+    {
+      "text": "Fetch the items from the API",
+      "tag": "restates"
+    },
+    {
+      "text": "print('fetched",
+      "tag": "dead-code"
+    },
+    {
+      "text": "---------------- Private helpers",
+      "tag": "banner"
+    },
+    {
+      "exact": "// FIXME",
+      "tag": "bare-todo"
     }
   ],
   "context": [
-    "ignore_for_file: prefer_const_constructors",
-    "Hive boxes must not be opened twice; keep this lazy and shared.",
-    "The API sends updatedAt in seconds, not milliseconds."
+    {
+      "text": "ignore_for_file: prefer_const_constructors",
+      "tag": "untouchable"
+    },
+    {
+      "text": "Hive boxes must not be opened twice; keep this lazy and shared.",
+      "tag": "trap"
+    },
+    {
+      "text": "The API sends updatedAt in seconds, not milliseconds.",
+      "tag": "constraint"
+    }
   ],
   "stale": [
-    "Cache expires after 10 minutes",
-    "Returns an empty list when the device is offline."
+    {
+      "text": "Cache expires after 10 minutes",
+      "tag": "stale"
+    },
+    {
+      "text": "Returns an empty list when the device is offline.",
+      "tag": "stale"
+    }
   ],
   "expect_comment": [
     {
@@ -30,7 +64,8 @@
         "reject",
         "too many",
         "rate"
-      ]
+      ],
+      "tag": "magic-number"
     }
   ]
 }

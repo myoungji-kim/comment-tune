@@ -71,6 +71,7 @@ Edit `rules/` and `tools/`, then run `python3 scripts/build.py`. CI runs
 
 ```
 python3 evals/run.py --selftest                       # scorer sanity check, offline
+python3 evals/run.py --coverage                       # case items per tag; flags thin spots
 python3 evals/run.py --agent claude --arm skill       # real headless runs
 python3 evals/run.py --agent claude --arm baseline    # same agent, no plugin
 ```

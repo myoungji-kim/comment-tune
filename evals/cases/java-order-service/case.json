@@ -2,26 +2,66 @@
   "file": "OrderService.java",
   "commit_message": "Add OrderService\n\nRefunds pause 250 ms between orders because Stripe allows at most\n4 refund requests per second per account.",
   "noise": [
-    "======================= Dependencies",
     {
-      "exact": "// Constructor"
+      "text": "======================= Dependencies",
+      "tag": "banner"
     },
-    "Gets the order by id.",
-    "Updated to use the new PaymentGateway as requested in review",
-    "We used to reserve inventory first",
-    "orderRepository.flush();",
-    "TODO: fix this",
-    "loop through the items and add up the price"
+    {
+      "exact": "// Constructor",
+      "tag": "restates"
+    },
+    {
+      "text": "Gets the order by id.",
+      "tag": "restates"
+    },
+    {
+      "text": "Updated to use the new PaymentGateway as requested in review",
+      "tag": "narration"
+    },
+    {
+      "text": "We used to reserve inventory first",
+      "tag": "history"
+    },
+    {
+      "text": "orderRepository.flush();",
+      "tag": "dead-code"
+    },
+    {
+      "text": "TODO: fix this",
+      "tag": "bare-todo"
+    },
+    {
+      "text": "loop through the items and add up the price",
+      "tag": "restates"
+    }
   ],
   "context": [
-    "Copyright 2026 Acme Corp.",
-    "Licensed under the Apache License, Version 2.0.",
-    "@Transactional must stay on this public method: Spring's proxy skips self-invocation.",
-    "Stripe rejects statement descriptors longer than 22 characters."
+    {
+      "text": "Copyright 2026 Acme Corp.",
+      "tag": "untouchable"
+    },
+    {
+      "text": "Licensed under the Apache License, Version 2.0.",
+      "tag": "untouchable"
+    },
+    {
+      "text": "@Transactional must stay on this public method: Spring's proxy skips self-invocation.",
+      "tag": "trap"
+    },
+    {
+      "text": "Stripe rejects statement descriptors longer than 22 characters.",
+      "tag": "constraint"
+    }
   ],
   "stale": [
-    "Returns null if the order does not exist.",
-    "Retries up to 3 times"
+    {
+      "text": "Returns null if the order does not exist.",
+      "tag": "stale"
+    },
+    {
+      "text": "Retries up to 3 times",
+      "tag": "stale"
+    }
   ],
   "expect_comment": [
     {
@@ -31,7 +71,8 @@
         "twice",
         "double",
         "retr"
-      ]
+      ],
+      "tag": "trap"
     },
     {
       "kind": "fill",
@@ -41,7 +82,8 @@
         "/s",
         "per sec",
         "rate limit"
-      ]
+      ],
+      "tag": "magic-number"
     }
   ]
 }

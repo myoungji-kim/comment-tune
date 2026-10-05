@@ -14,6 +14,10 @@
     python3 evals/run.py --score CASE FILE
         Score one output file against a case.
 
+    python3 evals/run.py --coverage
+        Count case items per criteria tag and language, and flag tags with
+        too few items to trust a score on.
+
 Metrics per case: noise removed, context kept (the one that matters most:
 a tool that deletes the comments worth keeping is worse than none), stale
 comments fixed, expected comments present, code changed (must be no), tokens.
@@ -23,6 +27,7 @@ import datetime
 import json
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -31,10 +36,12 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CASES = ROOT / "evals" / "cases"
 RESULTS = ROOT / "evals" / "results"
+CRITERIA = ROOT / "rules" / "references" / "criteria.md"
 sys.path.insert(0, str(ROOT / "tools"))
 import comment_guard  # noqa: E402
 
 NEAR = 3  # an expected comment must end at most this many lines above its anchor
+MIN_PER_TAG = 2  # one item per tag can't tell a skill from luck
 
 BASELINE_PROMPT = (
     "Clean up the code comments in {file}: remove noise, add context that is "
@@ -54,6 +61,28 @@ def load_case(name):
     return case
 
 
+def criteria_tags():
+    """Valid tags for each case group, read from the criteria tables."""
+    found, section = {}, None
+    for line in CRITERIA.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            section = line[3:].split()[0]
+        elif m := re.match(r"\| `([\w-]+)` \|", line):
+            found.setdefault(section, []).append(m[1])
+    return {
+        "noise": found["trim"],
+        "context": found["fill"] + ["untouchable"],
+        "stale": found["fix"],
+        "expect_comment": found["fill"],
+    }
+
+
+def tag_errors(case, valid):
+    return [f"{group}[{i}]: tag {item.get('tag')!r}"
+            for group, tags in valid.items()
+            for i, item in enumerate(case[group]) if item.get("tag") not in tags]
+
+
 def score(case, out_path, in_path=None):
     in_path = in_path or CASES / case["name"] / "input" / case["file"]
     src = pathlib.Path(out_path).read_text(encoding="utf-8")
@@ -67,13 +96,13 @@ def score(case, out_path, in_path=None):
     texts = [norm(t) for _, t in comments]
 
     def present(item):
-        if isinstance(item, dict):
+        if "exact" in item:
             return norm(item["exact"]) in texts
-        return any(norm(item) in t for t in texts)
+        return any(norm(item["text"]) in t for t in texts)
 
     lines = src.splitlines()
     # A leftover noise or stale comment can't count as the expected one.
-    bad = [norm(b["exact"] if isinstance(b, dict) else b) for b in case["noise"] + case["stale"]]
+    bad = [norm(b.get("exact") or b["text"]) for b in case["noise"] + case["stale"]]
     spans = [(ln, ln + t.count("\n"), norm(t)) for ln, t in comments
              if not any(b in norm(t) for b in bad)]
 
@@ -109,8 +138,12 @@ def perfect(s):
 
 def selftest(names):
     ok = True
+    valid = criteria_tags()
     for name in names:
         case = load_case(name)
+        for err in tag_errors(case, valid):
+            print(f"  FAIL: {name} {err} is not in criteria.md")
+            ok = False
         before = score(case, CASES / name / "input" / case["file"])
         ideal = score(case, CASES / name / "reference" / case["file"])
         print(f"{name}\n  before: {fmt(before)}\n  ideal:  {fmt(ideal)}")
@@ -125,6 +158,28 @@ def selftest(names):
             ok = False
     print("selftest ok" if ok else "selftest FAILED")
     return 0 if ok else 1
+
+
+def coverage(names):
+    valid = criteria_tags()
+    cases = [load_case(n) for n in names]
+    langs = sorted({pathlib.Path(c["file"]).suffix for c in cases})
+    print(f"coverage: {len(cases)} cases; missing = 0 items, thin = under {MIN_PER_TAG}\n")
+    print(" " * 18 + "".join(f"{lang:>7}" for lang in langs) + f"{'total':>7}")
+    gaps = []
+    for group, tags in valid.items():
+        items = [(pathlib.Path(c["file"]).suffix, i["tag"]) for c in cases for i in c[group]]
+        print(f"{group} ({len(items)})")
+        for tag in tags:
+            per = [items.count((lang, tag)) for lang in langs]
+            total = sum(per)
+            flag = "missing" if total == 0 else "thin" if total < MIN_PER_TAG else ""
+            if flag:
+                gaps.append(f"{group}/{tag}")
+            cells = "".join(f"{n or '-':>7}" for n in per)
+            print(f"  {tag:<16}{cells}{total:>7}  {flag}".rstrip())
+    print(f"\n{len(gaps)} gaps: {', '.join(gaps)}" if gaps else "\nno gaps")
+    return 0
 
 
 def workspace(case):
@@ -228,11 +283,14 @@ def main():
     ap.add_argument("--model")
     ap.add_argument("--keep", action="store_true", help="keep temp workspaces")
     ap.add_argument("--score", nargs=2, metavar=("CASE", "FILE"))
+    ap.add_argument("--coverage", action="store_true")
     args = ap.parse_args()
 
     names = args.case or sorted(p.name for p in CASES.iterdir() if (p / "case.json").exists())
     if args.selftest:
         return selftest(names)
+    if args.coverage:
+        return coverage(names)
     if args.score:
         s = score(load_case(args.score[0]), args.score[1])
         print(fmt(s))
