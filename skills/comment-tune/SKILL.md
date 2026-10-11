@@ -47,9 +47,10 @@ Tune comments in one pass: **trim** the noise, **fill** missing context,
      say so in the report.
    - Edit comments only.
    - After editing: `<python> <dir>/scripts/comment_guard.py verify`, with
-     the same interpreter. If it reports `CODE CHANGED`, revert that file's
-     edits and redo them. With no Python at all, check `git diff` yourself:
-     only comment lines may differ.
+     the same interpreter. If it reports `CODE CHANGED`, undo your own edits
+     to that file and redo them. Never `git checkout` or `git restore` it:
+     the file may hold the user's uncommitted work. With no Python at all,
+     check `git diff` yourself: only comment lines may differ.
 7. **Finish** with the commit message draft and one line of totals.
 
 ## Report format
