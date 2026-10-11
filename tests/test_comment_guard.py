@@ -121,6 +121,17 @@ class Fingerprint(unittest.TestCase):
         b = 'def f():\n    """New."""\n    return 1\n'
         self.assertTrue(same_code("a.py", a, b))
 
+    def test_python_indentation_counts(self):
+        a = "if x:\n    a()\nb()\n"
+        self.assertFalse(same_code("a.py", a, "if x:\n    a()\n    b()\n"))
+        self.assertTrue(same_code("a.py", a, "if x:\n    # c\n    a()\nb()  # d\n"))
+        self.assertFalse(same_code("a.py", 'def f():\n    """Doc."""\n', "def f():\n"))
+
+    def test_yaml_indentation_counts(self):
+        a = "a:\n  b: 1\n  c: 2\n"
+        self.assertFalse(same_code("a.yaml", a, "a:\n  b: 1\nc: 2\n"))
+        self.assertTrue(same_code("a.yaml", a, "# top\na:\n  b: 1  # one\n\n  c: 2\n"))
+
 
 class Cli(unittest.TestCase):
     def test_compare(self):

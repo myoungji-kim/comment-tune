@@ -7,10 +7,11 @@
     comment_guard.py comments FILE      print the comments of FILE as JSON
 
 Exit status: 0 when no code changed, 1 when some did, 2 on usage errors or
-when a file can't be checked. A file using syntax the lexer doesn't model
-(see UNMODELED) is reported as `unchecked (reason)` and left out of the
-snapshot; check its diff by hand.
-Whitespace is ignored, so re-indenting or reflowing around a comment is fine.
+when `compare` can't check a file. A file using syntax the lexer doesn't
+model (see UNMODELED) is reported as `unchecked (reason)`; `snapshot` leaves
+it out and still exits 0, so check its diff by hand.
+Whitespace is ignored, so reflowing around a comment is fine, except
+indentation in Python and YAML, where it is structure.
 Standard library only, so the skill runs anywhere python3 does.
 """
 import hashlib
@@ -174,8 +175,9 @@ def _lex_python(src):
               and prev in (tokenize.NEWLINE, tokenize.NL, tokenize.INDENT, tokenize.DEDENT)
               and nxt in (tokenize.NEWLINE, tokenize.ENDMARKER)):
             comments.append((tok.start[0], tok.string))  # docstring
-        elif tok.type not in (tokenize.NL, tokenize.NEWLINE, tokenize.INDENT,
-                              tokenize.DEDENT, tokenize.ENDMARKER):
+        elif tok.type in (tokenize.INDENT, tokenize.DEDENT):
+            code.append("<INDENT>" if tok.type == tokenize.INDENT else "<DEDENT>")
+        elif tok.type not in (tokenize.NL, tokenize.NEWLINE, tokenize.ENDMARKER):
             code.append(tok.string)
         if tok.type not in (tokenize.COMMENT, tokenize.NL):
             prev = tok.type
@@ -281,7 +283,11 @@ def split(path, src=None):
 
 def fingerprint(path, src=None):
     code, _ = split(path, src)
-    return hashlib.sha256(" ".join(code.split()).encode()).hexdigest()
+    if os.path.splitext(path)[1].lower() in (".yml", ".yaml"):
+        norm = "\n".join(line.rstrip() for line in code.splitlines() if line.strip())
+    else:
+        norm = " ".join(code.split())
+    return hashlib.sha256(norm.encode()).hexdigest()
 
 
 def _state_path():
