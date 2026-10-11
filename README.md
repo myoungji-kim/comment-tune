@@ -49,6 +49,9 @@ Without the plugin, copy `AGENTS.md` into your project, or its content into a
 | narrow the scope | `--trim-only`, `--fill-only`, `--fix-only` |
 | apply without asking | `--apply` |
 
+If another command already uses either name, call it with the plugin prefix:
+`/comment-tune:comment-tune`, `/comment-tune:comment-tune-audit`.
+
 Start with the audit, then tune the directories it points to. Tuning a whole
 large repo in one run makes a report too long to review.
 
