@@ -5,6 +5,16 @@ Cut the noise. Keep the context.
 A Claude Code plugin that tunes code comments: trim the noise, fill in
 missing context, fix stale ones. It never changes code.
 
+```
+src/order/OrderService.java
+ 1. L42  remove   trim/narration      "Updated to use new client as requested"
+ 2. L88  rewrite  fix/stale           says "returns null", returns Optional → "// Empty if not found."
+ 3. L103 add      fill/magic-number   "// Stripe allows 4 req/s per account; 250 ms stays under it."  (from git log a1b2c3d)
+ 4. L120 add?     fill/magic-number   needs input: where does the 500-item cap come from?
+
+Apply 1-3? (all / numbers / edit N)
+```
+
 ## What you get
 
 - **Core rules, always on.** Four rules (`rules/core.md`, under 50 lines) are
@@ -35,6 +45,9 @@ because IDEs and doc tools show them to callers.
 /plugin install comment-tune@comment-tune
 ```
 
+Needs `git`. The code-unchanged check needs Python 3; without it, the skill
+checks `git diff` by hand instead.
+
 Without the plugin, copy `AGENTS.md` into your project, or its content into a
 `CLAUDE.md`, for the core rules alone.
 
@@ -57,11 +70,13 @@ large repo in one run makes a report too long to review.
 
 ## Results
 
-Measured with Claude Code in headless mode, the user's own plugins and settings
-left out. Scores come from `evals/run.py`; numbers are totals over all runs.
+Measured on 2026-10-05 and 06 with Claude Code in headless mode on Claude
+Opus 5.5, the user's own plugins and settings left out. Scores come from
+`evals/run.py`; numbers are totals over all runs.
 
 **Against the same model with a plain "clean up the comments" prompt**, on 12
-real open-source files, 3 runs each:
+real open-source files, 3 runs each. This comparison ran on an earlier
+version, before the PHP cases and the rule that keeps public API docs:
 
 | | comment-tune | plain prompt |
 |---|---|---|
@@ -97,8 +112,8 @@ to run.
 ### Cost
 
 - **Always on:** the core rules add about 460 tokens to each session.
-- **Per run, it depends on the edits, not the file size.** With Claude Code's
-  default model, one `/comment-tune --apply` on a real file cost $0.17–0.18
+- **Per run, it depends on the edits, not the file size.** With Opus 5.5,
+  one `/comment-tune --apply` on a real file cost $0.17–0.18
   when nothing needed changing (4 turns) and about $0.36 when many comments
   did (16–19 turns). The plain prompt cost $0.19–0.37 on the same four files;
   the averages were $0.27 for both. About 85% of the tokens are cache reads,
